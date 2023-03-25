@@ -1,0 +1,23 @@
+{
+    "framerate": 60,
+    "show_region": false,
+    "video_size_x": 600,
+    "video_size_y": 600,
+    "x_offset":15,
+    "y_offset":15,
+    "uniqe_file_name": "%Y-%m-%d_%H-%M-%S",
+    "microphone_device": "fdsafdsa",
+    "desktop_audio_device": "fdasfsda",
+    "microphone_device_audio_channels": 1,
+    "desktop_device_audio_channels": 2,
+    "microphone_device_audio_frequency": 4410,
+    "desktop_device_audio_frequency": 4800,
+    "stream_port": "upd://127.0.0.1:3000",
+    "screenshot_output_dir": "F:\\School\\Capstone\\screenshotFFMPEG",
+    "stream_cache_dir": "F:\\School\\Capstone\\FFMPEGCache",
+    "video_output_dir": "F:\\School\\Capstone\\videoOutputFFMPEG",
+    "action_replay_dur": 15,
+    "audio_format": "tfdsa",
+    "video_format": "fdsafdsa",
+    "picture_format": ".jpeg"
+}
