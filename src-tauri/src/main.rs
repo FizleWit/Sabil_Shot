@@ -7,6 +7,7 @@ use serde_derive::{Deserialize, Serialize};
 use std::fs;
 extern crate serde_json;
 use std::process::Command;
+//use std::sync::Exclusive;
 
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
@@ -109,49 +110,56 @@ fn b_seetings_btn_pressed() -> () {
 }
 
 #[tauri::command]
-fn record_start_btn_pressed() -> () {
+async fn record_start_btn_pressed() -> () {
     println!("record start btn execute");
+    record_start_ffmepg_command().await;
 }
 
 #[tauri::command]
-fn record_stop_btn_pressed() -> () {
+async fn record_stop_btn_pressed() -> () {
     println!("record stop execute");
+    record_stop_ffmpeg_command().await;
 
 }
 
 #[tauri::command]
 async fn screenshot_exe_btn_pressed() -> () {
     println!("screenshot exe btn execute");
-     screenshot_exe_ffmpeg_btn().await;
+     screenshot_exe_ffmpeg_command().await;
 }
 
 #[tauri::command]
-fn screen_caching_start_btn_pressed() -> () {
+async fn screen_caching_start_btn_pressed() -> () {
     println!("scren caching start execute");
+    caching_start_ffmepg_command().await;
 }
 
 #[tauri::command]
-fn screen_caching_stop_btn_pressed() -> () {
+async fn screen_caching_stop_btn_pressed() -> () {
     println!("screen caching stop execute");
+    caching_stop_ffmpeg_command().await;
 }
 
 #[tauri::command]
-fn action_replay_exe_btn_pressed() -> () {
+async fn action_replay_exe_btn_pressed() -> () {
     println!("action replay exe btn execute");
+    action_replay_exe_ffmpeg_command().await;
 }
 
 #[tauri::command]
-fn action_replay_and_record_btn_start_pressed() -> () {
+async fn action_replay_and_record_btn_start_pressed() -> () {
     println!("action replay and record btn start execute");
+    action_replay_and_record_start_ffmpeg_command().await;
 }
 
 #[tauri::command]
 async fn action_replay_and_record_btn_stop_pressed() -> () {
     println!("action replay and record btn stop execute");
+    action_replay_and_record_stop_ffmpeg_command().await;
 }
 #[tauri::command]
-async fn return_framerate_data() ->i32{
-    let mut variable_list = {
+fn return_framerate_data() ->i32{
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -159,7 +167,7 @@ async fn return_framerate_data() ->i32{
 }
 #[tauri::command]
 fn return_show_region_data() ->bool{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -167,7 +175,7 @@ fn return_show_region_data() ->bool{
 }
 #[tauri::command]
 fn return_video_size_x_data() ->i32{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -175,7 +183,7 @@ fn return_video_size_x_data() ->i32{
 }
 #[tauri::command]
 fn return_video_size_y_data() ->i32{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -183,7 +191,7 @@ fn return_video_size_y_data() ->i32{
 }
 #[tauri::command]
 fn return_unique_file_name_data() ->String{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -191,7 +199,7 @@ fn return_unique_file_name_data() ->String{
 }
 #[tauri::command]
 fn return_micropohne_device_data() ->String{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -199,7 +207,7 @@ fn return_micropohne_device_data() ->String{
 }
 #[tauri::command]
 fn return_desktop_device_data() ->String{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -207,7 +215,7 @@ fn return_desktop_device_data() ->String{
 }
 #[tauri::command]
 fn return_stream_port_data() ->String{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -215,7 +223,7 @@ fn return_stream_port_data() ->String{
 }
 #[tauri::command]
 fn return_screenshot_output_dir_data() ->String{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -223,7 +231,7 @@ fn return_screenshot_output_dir_data() ->String{
 }
 #[tauri::command]
 fn return_stream_cache_dir_data() ->String{
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -232,7 +240,7 @@ fn return_stream_cache_dir_data() ->String{
 #[tauri::command]
 fn return_video_output_dir_data() ->String{
 
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -241,7 +249,7 @@ fn return_video_output_dir_data() ->String{
 #[tauri::command]
 fn return_action_replay_dur_data() ->i32{
     println!("return action replay data dur");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -250,7 +258,7 @@ fn return_action_replay_dur_data() ->i32{
 #[tauri::command]
 fn return_x_offset_data() ->i32{
     println!("return offset data");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -259,7 +267,7 @@ fn return_x_offset_data() ->i32{
 #[tauri::command]
 fn return_y_offset_data() ->i32{
     println!("return offset data");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       };
@@ -299,8 +307,15 @@ struct FfmpegVariables {
 //screen caching start stop
 //action replay exe
 //action replay and record start stop
-
-async fn screenshot_exe_ffmpeg_btn() ->(){
+fn return_bool_int_string(x : bool) -> String{
+    if x == true {
+    return "1".to_string();
+    }
+    else{
+        return "0".to_string();
+    }
+}
+async fn screenshot_exe_ffmpeg_command() ->(){
     println!("screenshot exe ffmpeg command");
     let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
@@ -342,9 +357,9 @@ async fn screenshot_exe_ffmpeg_btn() ->(){
       
 
 }
-fn action_replay_ffmpeg_command() ->(){
+async fn action_replay_exe_ffmpeg_command() ->(){
     println!("action replay exe ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
@@ -354,34 +369,76 @@ fn action_replay_ffmpeg_command() ->(){
       println!("Message from Rust: {}", variable_list.stream_cache_dir);
 
 }
-fn record_start_ffmepg_command() ->(){
+async fn record_start_ffmepg_command() ->(){
     println!("record start ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       
       };
-      println!("Message from Rust: {}", variable_list.stream_cache_dir);
+      //  -offset_x 10 -offset_y 20 -i desktop -strftime 1 "%Y-%m-%d_%H-%M-%S.mp4"
+      let mut ffmpegcommand = Command::new("ffmpeg");
+      ffmpegcommand.arg("-hide_banner");
+    ffmpegcommand.arg("-f");
+    ffmpegcommand.arg("dshow");
+   // startrecord.arg("-ac");
+   // startrecord.arg("2");
+  //  startrecord.arg("-ar");
+  //  startrecord.arg("48000");
+  ffmpegcommand.arg("-i");
+    ffmpegcommand.arg("audio=".to_string() + variable_list.microphone_device.to_string().as_str() );
+    ffmpegcommand.arg("-f");
+    ffmpegcommand.arg("dshow");
+   // startrecord.arg("-ac");
+   // startrecord.arg("2");
+  //  startrecord.arg("-ar");
+  //  startrecord.arg("48000");   
+  ffmpegcommand.arg("audio=".to_string() + variable_list.desktop_audio_device.to_string().as_str() );
+  ffmpegcommand.arg("-filter_complex");
+  ffmpegcommand.arg("amix=input=2");
+  ffmpegcommand.arg("-f");
+  ffmpegcommand.arg("gdigrab");
+  ffmpegcommand.arg("-framerate");
+  ffmpegcommand.arg((variable_list.framerate.to_string()).as_str());
+  ffmpegcommand.arg("-show_region");
+  ffmpegcommand.arg(return_bool_int_string(variable_list.show_region));
+  ffmpegcommand.arg("-video_size");
+  ffmpegcommand.arg(variable_list.video_size_x.to_string() +"x"+(variable_list.video_size_y.to_string()).as_str());
+  ffmpegcommand.arg("-offset_x");
+  ffmpegcommand.arg((variable_list.x_offset.to_string()).as_str());
+  ffmpegcommand.arg("-offset_y");
+  ffmpegcommand.arg((variable_list.y_offset.to_string()).as_str());
+  ffmpegcommand.arg("-i");
+  ffmpegcommand.arg("desktop");
+  ffmpegcommand.arg("-strftime");
+  ffmpegcommand.arg("1");
+  ffmpegcommand.arg( variable_list.video_output_dir.to_string() + "\\"+(variable_list.uniqe_file_name.to_string()).as_str() +(variable_list.video_format.to_string()).as_str());
+
+  ffmpegcommand
+  .status()
+  .expect("DID NTO WORK LOSER");
+      //println!("Message from Rust: {}", variable_list.stream_cache_dir);
 
 }
 
-fn record_stop_ffmpeg_command() -> ( ){
+async fn record_stop_ffmpeg_command() -> ( ){
     println!("record stop ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
       
       };
+
       println!("Message from Rust: {}", variable_list.stream_cache_dir);
 }
 
-fn caching_start_ffmepg_command() ->(){
+async fn caching_start_ffmepg_command() ->(){
     println!("caching start ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
@@ -392,9 +449,9 @@ fn caching_start_ffmepg_command() ->(){
 
 }
 
-fn caching_stop_ffmpeg_command() -> ( ){
+async fn caching_stop_ffmpeg_command() -> ( ){
     println!("caching stop ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
@@ -404,9 +461,9 @@ fn caching_stop_ffmpeg_command() -> ( ){
       println!("Message from Rust: {}", variable_list.stream_cache_dir);
 }
 
-fn action_replay_and_record_start_ffmpeg_command() ->(){
+async fn action_replay_and_record_start_ffmpeg_command() ->(){
     println!("action replay and record start ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
@@ -417,9 +474,9 @@ fn action_replay_and_record_start_ffmpeg_command() ->(){
 
 }
 
-fn action_replay_and_record_stop_ffmpeg_command() -> () {
+async fn action_replay_and_record_stop_ffmpeg_command() -> () {
     println!("action replay and record stop ffmpeg command");
-    let mut variable_list = {
+    let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
       
         // Load the MissyFoodSchedule structure from the string.
