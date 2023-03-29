@@ -64,28 +64,8 @@ fn test2_btn_pressed(test: &str) -> String {
       return variable_list.stream_cache_dir;
 }
 
-#[tauri::command]
-fn save_settings_btn_pressed(framerate: i32,
-    show_region: bool,
-    video_size_x: i32,
-    video_size_y: i32,
-    x_offset:i32,
-    y_offset:i32,
-    uniqe_file_name: String,
-    microphone_device: String,
-    desktop_audio_device: String,
-    microphone_device_audio_channels: i32,
-    desktop_device_audio_channels: i32,
-    microphone_device_audio_frequency: i32,
-    desktop_device_audio_frequency: i32,
-    stream_port: String,
-    screenshot_output_dir: String,
-    stream_cache_dir: String,
-    video_output_dir: String,
-    action_replay_dur: i32,
-    audio_format: String,
-    video_format: String,
-    picture_format: String) -> () {
+#[tauri::command(rename_all = "snake_case")]
+fn save_settings_btn_pressed(framerate: i32, show_region: bool, video_size_x: i32, video_size_y: i32, x_offset:i32, y_offset:i32, uniqe_file_name: String, microphone_device: String, desktop_audio_device: String, microphone_device_audio_channels: i32, desktop_device_audio_channels: i32, microphone_device_audio_frequency: i32, desktop_device_audio_frequency: i32, stream_port: String, screenshot_output_dir: String, stream_cache_dir: String, video_output_dir: String, action_replay_dur: i32, audio_format: String, video_format: String, picture_format: String) -> () {
     println!("save settings btn execute");
     let mut variables_list= {
         let variables_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
@@ -93,6 +73,7 @@ fn save_settings_btn_pressed(framerate: i32,
         // Load the MissyFoodSchedule structure from the string.
         serde_json::from_str::<FfmpegVariables>(&variables_list).unwrap()
     };
+    //println!("framerate 1: {} + {}", variables_list.framerate, framerate);
     variables_list.framerate = framerate;
     variables_list.show_region= show_region;
     variables_list.video_size_x= video_size_x;
@@ -116,8 +97,9 @@ fn save_settings_btn_pressed(framerate: i32,
     variables_list.picture_format= picture_format;
     
     let text = serde_json::to_string(&variables_list).unwrap();
-    fs::write("./Data/Variables2.json", text).ok();
-
+    fs::write("./Data/ffmpeg_variables.json", text).ok();
+    //println!("framerate 1: {} + {}", variables_list.framerate, framerate);
+    //println!("save settings btn execute 2 ");
 }
       
 
@@ -138,9 +120,9 @@ fn record_stop_btn_pressed() -> () {
 }
 
 #[tauri::command]
-fn screenshot_exe_btn_pressed() -> () {
+async fn screenshot_exe_btn_pressed() -> () {
     println!("screenshot exe btn execute");
-     screenshot_exe_ffmpeg_btn();
+     screenshot_exe_ffmpeg_btn().await;
 }
 
 #[tauri::command]
@@ -168,7 +150,7 @@ async fn action_replay_and_record_btn_stop_pressed() -> () {
     println!("action replay and record btn stop execute");
 }
 #[tauri::command]
-fn return_framerate_data() ->i32{
+async fn return_framerate_data() ->i32{
     let mut variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
@@ -249,6 +231,7 @@ fn return_stream_cache_dir_data() ->String{
 }
 #[tauri::command]
 fn return_video_output_dir_data() ->String{
+
     let mut variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
@@ -257,6 +240,7 @@ fn return_video_output_dir_data() ->String{
 }
 #[tauri::command]
 fn return_action_replay_dur_data() ->i32{
+    println!("return action replay data dur");
     let mut variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
@@ -265,6 +249,7 @@ fn return_action_replay_dur_data() ->i32{
 }
 #[tauri::command]
 fn return_x_offset_data() ->i32{
+    println!("return offset data");
     let mut variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
@@ -273,6 +258,7 @@ fn return_x_offset_data() ->i32{
 }
 #[tauri::command]
 fn return_y_offset_data() ->i32{
+    println!("return offset data");
     let mut variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&variable_list).unwrap()
@@ -314,7 +300,7 @@ struct FfmpegVariables {
 //action replay exe
 //action replay and record start stop
 
-  async fn screenshot_exe_ffmpeg_btn() ->(){
+async fn screenshot_exe_ffmpeg_btn() ->(){
     println!("screenshot exe ffmpeg command");
     let variable_list = {
         let variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
