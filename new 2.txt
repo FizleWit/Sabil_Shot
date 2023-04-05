@@ -1,0 +1,83 @@
+javascript
+
+invoke("save_settings_btn_pressed", {
+  framerate: document.querySelector("#framerate_data_id").value,
+  show_region: document.querySelector("#show_region_data_id").value,
+  video_size_x: document.querySelector("#region_size_x_data_id").value,
+  video_size_y: document.querySelector("#region_size_y_data_id").value,
+  x_offset:   document.querySelector("#x_offset_data_id").value,
+  y_offset: document.querySelector("#y_offest_data_id").value,
+  uniqe_file_name: document.querySelector("#unique_file_name_data_id").value,
+  microphone_device: document.querySelector("#microphone_audio_input_id").value,
+  desktop_audio_device: document.querySelector("#desktop_audio_input_id").value,
+  microphone_device_audio_channels: "1",
+  desktop_device_audio_channels: "2",
+  microphone_device_audio_frequency: "1440",
+  desktop_device_audio_frequency: "4800",
+  stream_port: document.querySelector("#streaming_url_data_id").value,
+  screenshot_output_dir: document.querySelector("#screenshot_saving_dir_data_id").value,
+  stream_cache_dir: document.querySelector("#video_caching_dir_data_id").value,
+  video_output_dir: document.querySelector("#video_output_dir_data_id").value,
+  action_replay_dur: document.querySelector("#action_replay_data_id").value,
+  audio_format: "test",
+  video_format: "test",
+  picture_format: ".jpeg"
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+rust 
+
+
+
+
+
+
+fn save_settings_btn_pressed(framerate: i32, show_region: bool, video_size_x: i32, video_size_y: i32, x_offset:i32, y_offset:i32, uniqe_file_name: String, microphone_device: String, desktop_audio_device: String, microphone_device_audio_channels: i32, desktop_device_audio_channels: i32, microphone_device_audio_frequency: i32, desktop_device_audio_frequency: i32, stream_port: String, screenshot_output_dir: String, stream_cache_dir: String, video_output_dir: String, action_replay_dur: i32, audio_format: String, video_format: String, picture_format: String) -> () {
+    println!("save settings btn execute");
+    let mut variables_list= {
+        let variables_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
+      
+        // Load the MissyFoodSchedule structure from the string.
+        serde_json::from_str::<FfmpegVariables>(&variables_list).unwrap()
+    };
+    variables_list.framerate = framerate;
+    variables_list.show_region= show_region;
+    variables_list.video_size_x= video_size_x;
+    variables_list.video_size_y= video_size_y;
+    variables_list.x_offset=x_offset;
+    variables_list.y_offset=y_offset;
+    variables_list.uniqe_file_name= uniqe_file_name;
+    variables_list.microphone_device= microphone_device;
+    variables_list.desktop_audio_device= desktop_audio_device;
+    variables_list.microphone_device_audio_channels= microphone_device_audio_channels;
+    variables_list.desktop_device_audio_channels= desktop_device_audio_channels;
+    variables_list.microphone_device_audio_frequency= microphone_device_audio_frequency;
+    variables_list.desktop_device_audio_frequency= desktop_device_audio_frequency;
+    variables_list.stream_port= stream_port;
+    variables_list.screenshot_output_dir= screenshot_output_dir;
+    variables_list.stream_cache_dir= stream_cache_dir;
+    variables_list.video_output_dir= video_output_dir;
+    variables_list.action_replay_dur= action_replay_dur;
+    variables_list.audio_format= audio_format;
+    variables_list.video_format= video_format;
+    variables_list.picture_format= picture_format;
+    
+    let text = serde_json::to_string(&variables_list).unwrap();
+    fs::write("./Data/Variables2.json", text).ok();
+
+}

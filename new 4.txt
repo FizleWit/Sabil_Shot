@@ -1,0 +1,2 @@
+use the `.` operator to call the method `Debug::fmt` on `&Output`: `.fmt("{#}")`rustcE0423
+main.rs(521, 18): original diagnostic

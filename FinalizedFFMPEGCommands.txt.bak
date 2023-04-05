@@ -22,7 +22,7 @@ ffmpeg -i udp://127.0.0.1:3000 -f segment -reset_timestamps 1 -segment_time 15 -
 
 "Microphone (Arctis Nova Pro Wireless)"
 
-ffmpeg -hide_banner -f dshow -i audio="Microphone (Arctis Nova Pro Wireless)" -f dshow -i audio="What U Hear (Sound Blaster Audigy 5/Rx)" -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -show_region 1 -video_size 600x600 -offset_x 10 -offset_y 20 -i desktop -strftime 1 -y "out%Y-%m-%d_%H-%M-%S.mp4"
+ffmpeg -hide_banner -f dshow -i audio="Microphone (Arctis Nova Pro Wireless)" -f dshow -i audio="\"What U Hear\" (Sound Blaster Audigy 5/Rx)" -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -show_region 1 -video_size 600x600 -offset_x 10 -offset_y 20 -i desktop -strftime 1 "%Y-%m-%d_%H-%M-%S.mp4"
 
 
 [dshow @ 0000028ff51c67c0] "DroidCam Source 3" (video)
@@ -46,9 +46,3 @@ ffmpeg -hide_banner -f dshow -i audio="Microphone (Arctis Nova Pro Wireless)" -f
 
 ] "(.*?)" \((audio|video)\)
 
-
-ffmpeg -hide_banner -f dshow -i audio="Microphone (Arctis Nova Pro Wireless)" -f dshow -i audio="What U Hear (Sound Blaster Audigy 5/Rx)" -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -show_region 1 -video_size 600x600 -offset_x 10 -offset_y 20 -i desktop -strftime 1 -y "out%Y-%m-%d_%H-%M-%S.mp4"
-
-ffmpeg -hide_banner -f dshow -i audio="Microphone (Arctis Nova Pro Wireless)" -f dshow -i audio="What U Hear (Sound Blaster Audigy 5/Rx)" -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -show_region 1 -video_size 600x600 -offset_x 10 -offset_y 20 -i desktop -strftime 1 -y "out%Y-%m-%d_%H-%M-%S.mp4"
-
-ffmpeg -hide_banner -f dshow -i audio="Microphone (Arctis Nova Pro Wireless)" -f dshow -i audio="What U Hear (Sound Blaster Audigy 5/Rx)" -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -video_size 400x400 -i desktop -strftime 1 "%Y_%H%M%S.mp4"

@@ -56,10 +56,15 @@ function return_String_bool(x){
     return true;
 }
 
+function testDirectoryResult(){
+  console.log(document.querySelector("#screenshot_saving_dir_data_id").value);
+}
+
 window.addEventListener("DOMContentLoaded", () => {
   document
     .querySelector("#save_settings_btn_id")
-    .addEventListener("click", () => write_data_to_json());
+    //.addEventListener("click", () => write_data_to_json());
+    .addEventListener("click",  () =>write_data_to_json());
 });
 
 window.addEventListener("DOMContentLoaded", () => {
@@ -121,4 +126,10 @@ window.addEventListener("DOMContentLoaded", () => {
   document
     .querySelector("#action_replay_and_record_btn_stop_id")
     .addEventListener("click", () => invoke("action_replay_and_record_btn_stop_pressed"));
+});
+
+window.addEventListener("DOMContentLoaded", () => {
+  document
+    .querySelector("#test1_btn_id")
+    .addEventListener("click", () => invoke("test2_btn_pressed"));
 });
