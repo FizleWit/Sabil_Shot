@@ -405,6 +405,7 @@ async fn action_replay_exe_ffmpeg_command() -> () {
     };
     println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
+
 async fn record_start_ffmepg_command() -> () {
     println!("record start ffmpeg command");
     let _variable_list = {
@@ -418,36 +419,40 @@ async fn record_start_ffmepg_command() -> () {
     .arg("-y")
     .arg("-f")
     .arg("dshow")
-   
-    .arg("-ac")
-    .arg("1")
-    .arg("-ar")
-    .arg("48000")
+   // .arg("-ac")
+   // .arg("1")
+   // .arg("-ar")
+   // .arg("48000")
      .arg("-i")
-     .arg("audio=".to_string() + _variable_list.microphone_device.as_str() )
+     .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
     .arg("-f")
     .arg("dshow")
     .arg("-i")
-    .arg("audio=\"What U Hear (Sound Blaster Audigy 5/Rx)\"")
+    .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
     .arg("-filter_complex")
     .arg("amix=inputs=2")
     .arg("-f")
     .arg("gdigrab")
     .arg("-framerate")
-    .arg("60")
+    .arg(_variable_list.framerate.to_string().as_str())
     .arg("-show_region")
-    .arg("1")
+    .arg(return_bool_int_string(_variable_list.show_region))
     .arg("-video_size")
-    .arg("600x600")
+    .arg(_variable_list.video_size_x.to_string()
+    + "x"
+    + (_variable_list.video_size_y.to_string()).as_str(),)
     .arg("-offset_x")
-    .arg("100")
+    .arg(_variable_list.x_offset.to_string().as_str())
     .arg("-offset_y")
-    .arg("100")
+    .arg(_variable_list.y_offset.to_string().as_str())
     .arg("-i")
     .arg("desktop")
     .arg("-strftime")
     .arg("1")
-    .arg("G:\\School\\Capstone\\screenshotFFMPEG\\%Y-%m-%d_%H-%M-%S.mp4");
+    .arg( _variable_list.video_output_dir.to_string()
+    + "\\recording"
+    + (_variable_list.uniqe_file_name.to_string()).as_str()
+    + (_variable_list.video_format.to_string()).as_str());
     ffmpegcommand.status().expect("DID NTO WORK LOSER");
     //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
@@ -472,7 +477,59 @@ async fn caching_start_ffmepg_command() -> () {
         
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+    /*
+    ffmpeg -hide_banner -f dshow -ac 2 -ar 48000 -i
+     audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{D9AE870B-D51C-4050-A7DE-20475EE70F0E}" 
+     -f dshow -ac 1 -ar 48000 -i 
+     audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{DE99F572-E285-4EBC-A263-2D782B212FA7}" 
+     -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -show_region 1 -video_size 600x600 
+     -offset_x 10 -offset_y 20 -i desktop -vcodec mpeg4 -q 12 -f mpegts udp://127.0.0.1:3000
+ */
+    let mut ffmpegcommand = Command::new("ffmpeg");
+    ffmpegcommand.arg("-hide_banner")
+    .arg("-y")
+    .arg("-f")
+    .arg("dshow")
+   // .arg("-ac")
+   // .arg("1")
+   // .arg("-ar")
+   // .arg("48000")
+     .arg("-i")
+     .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
+    .arg("-f")
+    .arg("dshow")
+    .arg("-i")
+    .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
+    .arg("-filter_complex")
+    .arg("amix=inputs=2")
+    .arg("-f")
+    .arg("gdigrab")
+    .arg("-framerate")
+    .arg(_variable_list.framerate.to_string().as_str())
+    .arg("-show_region")//comment out after testing
+    .arg(return_bool_int_string(_variable_list.show_region))//comment out after testing
+    .arg("-video_size")
+    .arg(_variable_list.video_size_x.to_string()
+    + "x"
+    + (_variable_list.video_size_y.to_string()).as_str())
+    .arg("-offset_x")
+    .arg(_variable_list.x_offset.to_string().as_str())
+    .arg("-offset_y")
+    .arg(_variable_list.y_offset.to_string().as_str())
+    .arg("-i")
+    .arg("desktop")
+    .arg("-vcodec")
+    .arg("mpeg4")
+    .arg("-q")
+    .arg("12")
+    .arg("-f")
+    .arg("mpegts")
+    .arg( _variable_list.stream_port.to_string().as_str());
+    
+    ffmpegcommand.status().expect("DID NTO WORK LOSER");
+    //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+
+   // stream_segmentation_ffmpeg_command().await;
 }
 
 async fn caching_stop_ffmpeg_command() -> () {
@@ -484,6 +541,39 @@ async fn caching_stop_ffmpeg_command() -> () {
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+}
+
+async fn stream_segmentation_ffmpeg_command() -> (){
+    println!("caching start ffmpeg command");
+    let _variable_list = {
+        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
+        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
+    };
+    let mut ffmpegcommand = Command::new("ffmpeg");
+    ffmpegcommand.arg("-i")
+    .arg( _variable_list.stream_port.to_string().as_str())
+    .arg("-f")
+    .arg("segment")
+    .arg("-reset_timestamps")
+    .arg("1")
+    .arg("-segment_time")
+    .arg(_variable_list.action_replay_dur.to_string())
+    .arg("-min_seg_duration")
+    .arg("00:00:".to_string() + _variable_list.action_replay_dur.to_string().as_str())
+    .arg("-strftime")
+    .arg("1")
+    .arg( _variable_list.stream_cache_dir.to_string()
+    + "\\cache"
+    + (_variable_list.uniqe_file_name.to_string()).as_str()
+    + (_variable_list.video_format.to_string()).as_str());
+    //ffmpegcommand.status().expect("DID NTO WORK LOSER");
+
+
+    /*
+    ffmpeg -i udp://127.0.0.1:3000 -f segment 
+    -reset_timestamps 1 -segment_time 15 -min_seg_duration 00:00:15 
+    -strftime 1 "F:\School\Capstone\FFMPEGCache\%Y-%m-%d_%H-%M-%S.mp4"
+     */
 }
 
 async fn action_replay_and_record_start_ffmpeg_command() -> () {
@@ -522,7 +612,6 @@ fn return_audio_devices_ffmpeg_command() -> Result<String, std::io::Error> {
 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 println!("{:#?} test", stdout);
 Ok(stdout)
-
 }
 
 //https://doc.rust-lang.org/std/process/struct.Stdio.html#method.piped
