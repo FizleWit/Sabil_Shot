@@ -67,8 +67,6 @@ fn test1_btn_pressed() -> () {
     println!("Test1_btn_pressed execute");
     let mut _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-
-        
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
 
@@ -80,12 +78,10 @@ fn test1_btn_pressed() -> () {
 }
 
 #[tauri::command]
-fn test2_btn_pressed() -> () {
-    
-    let output = return_audio_devices_ffmpeg_command();
-
-    println!("{:#?}",output);
+async fn test2_btn_pressed() -> () {
+   //stream_segmentation_ffmpeg_command().await;
 }
+
 
 #[tauri::command(rename_all = "snake_case")]
 fn save_settings_btn_pressed(
@@ -179,7 +175,7 @@ async fn screen_caching_start_btn_pressed() -> () {
 #[tauri::command]
 async fn screen_caching_stop_btn_pressed() -> () {
     println!("screen caching stop execute");
-    caching_stop_ffmpeg_command().await;
+    //caching_stop_ffmpeg_command().await;
 }
 
 #[tauri::command]
@@ -191,13 +187,13 @@ async fn action_replay_exe_btn_pressed() -> () {
 #[tauri::command]
 async fn action_replay_and_record_btn_start_pressed() -> () {
     println!("action replay and record btn start execute");
-    action_replay_and_record_start_ffmpeg_command().await;
+   // action_replay_and_record_start_ffmpeg_command().await;
 }
 
 #[tauri::command]
 async fn action_replay_and_record_btn_stop_pressed() -> () {
     println!("action replay and record btn stop execute");
-    action_replay_and_record_stop_ffmpeg_command().await;
+   // action_replay_and_record_stop_ffmpeg_command().await;
 }
 #[tauri::command]
 fn return_framerate_data() -> i32 {
@@ -529,8 +525,7 @@ async fn caching_start_ffmepg_command() -> () {
     ffmpegcommand.status().expect("DID NTO WORK LOSER");
     //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 
-   // stream_segmentation_ffmpeg_command().await;
-}
+
 
 async fn caching_stop_ffmpeg_command() -> () {
     println!("caching stop ffmpeg command");
@@ -566,7 +561,7 @@ async fn stream_segmentation_ffmpeg_command() -> (){
     + "\\cache"
     + (_variable_list.uniqe_file_name.to_string()).as_str()
     + (_variable_list.video_format.to_string()).as_str());
-    //ffmpegcommand.status().expect("DID NTO WORK LOSER");
+    ffmpegcommand.status().expect("DID NTO WORK LOSER");
 
 
     /*
@@ -598,7 +593,7 @@ async fn action_replay_and_record_stop_ffmpeg_command() -> () {
     println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
 
-fn return_audio_devices_ffmpeg_command() -> Result<String, std::io::Error> {
+fn return_audio_devices_ffmpeg_command() -> () {
     let output = Command::new("ffmpeg")
     .arg("-hide_banner")
     .arg("-f")
@@ -611,7 +606,10 @@ fn return_audio_devices_ffmpeg_command() -> Result<String, std::io::Error> {
     
 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 println!("{:#?} test", stdout);
-Ok(stdout)
+Ok(stdout);
+}
+
+
 }
 
 //https://doc.rust-lang.org/std/process/struct.Stdio.html#method.piped
