@@ -4,11 +4,13 @@
 )]
 //use std::{process::Command, string};
 use serde_derive::{Deserialize, Serialize};
-use std::fmt;
+//use std::fmt;
 use std::fs;
 use std::str;
 extern crate serde_json;
-use regex::Regex;
+use chrono::{Utc, DateTime};
+use std::io::Error;
+//use regex::Regex;
 //use std::process::{Command, Stdio};
 use std::process::Command;
 //use std::sync::Exclusive;
@@ -18,7 +20,12 @@ use std::process::Command;
 fn greet(name: &str) -> String {
     format!("Hello, {}! You've been greeted from Rust!", name)
 }
-
+fn current_datetime_string(datetimeformat: String) -> String {
+    let current_datetime: DateTime<Utc> = Utc::now();
+    current_datetime
+    .format(&datetimeformat)
+    .to_string()
+}
 fn main() {
     //add javascript script file to html reminder
     tauri::Builder::default()
@@ -395,11 +402,38 @@ async fn action_replay_exe_ffmpeg_command() -> () {
     println!("action replay exe ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-
-        
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
+    let mut files = fs::read_dir(_variable_list.stream_cache_dir.to_string()).unwrap()
+        .filter_map(Result::ok)
+        .filter(|entry| entry.file_type().unwrap().is_file())
+        .collect::<Vec<_>>();
+    
+    files.sort_by_key(|entry| entry.metadata().unwrap().modified().unwrap());
+    files.reverse();
+    let file_paths = files.iter().map(|entry| entry.path()).collect::<Vec<_>>();
+    
+    let mut ffmpegcommand = Command::new("ffmpeg");
+    ffmpegcommand.arg("-hide_banner")
+    .arg("-y")
+    .arg("-i")
+    .arg(file_paths[0].to_str().unwrap())
+    .arg("-i")
+    .arg(file_paths[0].to_str().unwrap())
+    .arg("-filter_complex")
+    .arg("[0:v][0:a][1:v][1:a]concat=n=2:v=1:a=1")
+    .arg("-f")
+    .arg("mp4")
+    .arg("-strftime")
+    .arg("1")
+    .arg(_variable_list.video_output_dir.to_string() + 
+    "\\ActionReplay." + 
+    current_datetime_string(_variable_list.uniqe_file_name.to_string()).as_str() + (_variable_list.video_format.to_string()).as_str());
+    ffmpegcommand.spawn().expect("YOU LOSE ERROR");
+    println!("finished test 2");
+
     println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+    
 }
 
 async fn record_start_ffmepg_command() -> () {
@@ -593,7 +627,7 @@ async fn action_replay_and_record_stop_ffmpeg_command() -> () {
     println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
 
-fn return_audio_devices_ffmpeg_command() -> () {
+fn return_audio_devices_ffmpeg_command() -> Result<String,Error> {
     let output = Command::new("ffmpeg")
     .arg("-hide_banner")
     .arg("-f")
@@ -606,9 +640,8 @@ fn return_audio_devices_ffmpeg_command() -> () {
     
 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 println!("{:#?} test", stdout);
-Ok(stdout);
+Ok(stdout)
 }
-
 
 }
 
