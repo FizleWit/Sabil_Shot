@@ -2,19 +2,55 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
+use winapi::shared::minwindef::{DWORD, LPCVOID, LPVOID};
 //use std::{process::Command, string};
-use serde_derive::{Deserialize, Serialize};
-//use std::fmt;
+use winapi::um::memoryapi::{WriteProcessMemory, VirtualAllocEx, VirtualFreeEx};
+use winapi::um::processthreadsapi::{GetCurrentProcessId, OpenProcess, TerminateProcess};
+use winapi::um::winnt::{MEM_COMMIT, MEM_RELEASE, PAGE_READWRITE, PROCESS_TERMINATE, PROCESS_VM_OPERATION, PROCESS_VM_WRITE, HANDLE,PROCESS_QUERY_INFORMATION};
+use std::process::{Command, Child};
+use std::convert::TryInto;
 use std::fs;
+use std::path::Path;
+//use std::io::{Error, ErrorKind};
+//use std::io::{Error, ErrorKind};
+//use std::process::{Command, Stdio};
+use std::ptr::null_mut;
+use std::ffi::OsStr;
+use std::os::windows::ffi::OsStrExt;
+//use winapi::um::processthreadsapi::{OpenProcess, TerminateProcess};
+use winapi::um::handleapi::CloseHandle;
+//use winapi::um::winnt::PROCESS_TERMINATE;
+use std::io::Write;
+//use std::process::{Command, Stdio};
+//use winapi::um::processthreadsapi::OpenProcess;
+use winapi::um::winnt::{PROCESS_ALL_ACCESS};
+//use std::ptr::null_mut;
+use winapi::um::winuser::{PostThreadMessageW, WM_CHAR};
+//use winapi::um::processthreadsapi::OpenProcess;
+
+//use winapi::um::memoryapi::WriteProcessMemory;
+//use std::process::Child;
+use std::io::{Error, ErrorKind};
+use serde_derive::{Deserialize, Serialize};
+
+use std::process::Stdio;
+use std::thread;
+use std::time::Duration;
+//use std::fmt;
+
 use std::str;
 extern crate serde_json;
 use chrono::{Utc, DateTime};
-use std::io::Error;
+//use async_process::Command;
+//use std::io::{Error, Write};
 //use regex::Regex;
 //use std::process::{Command, Stdio};
-use std::process::Command;
+//use std::process::Command;
 //use std::sync::Exclusive;
-
+static mut global_is_recording: u32 = 0 as u32;
+static mut global_is_streaming: u32 = 0 as u32;
+static mut global_is_segmenting: u32 = 0 as u32;
+static mut global_is_arandrec: u32 = 0 as u32;
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -156,15 +192,40 @@ fn b_seetings_btn_pressed() -> () {
 }
 
 #[tauri::command]
-async fn record_start_btn_pressed() -> () {
+ async fn record_start_btn_pressed() -> () {
+unsafe{    
     println!("record start btn execute");
-    record_start_ffmepg_command().await;
+        //let result2 =  ;
+        if global_is_recording == 0 {
+        match record_start_ffmepg_command() {
+            Ok(child) => {
+                println!("Started ffmpeg process with PID: {}", child.id());
+                // Do something with the child process here
+                
+                    global_is_recording = child.id() as u32;  
+                      println!("PID2a {}",global_is_recording);
+                
+            }
+            Err(e) => {
+                println!("Error starting ffmpeg process: {}", e);     
+        }
+    }
+}}
 }
-
 #[tauri::command]
 async fn record_stop_btn_pressed() -> () {
     println!("record stop execute");
-    record_stop_ffmpeg_command().await;
+    unsafe{
+        println!("record stop execute2");
+            //let _result = send_input_to_pid(global_is_recording, "q" as &str);
+            if global_is_recording != 0 {
+            let _result = send_input_to_pid(global_is_recording, "q" as &str);
+            global_is_recording = 0 as u32;
+        }
+        
+
+    }
+
 }
 
 #[tauri::command]
@@ -175,14 +236,66 @@ async fn screenshot_exe_btn_pressed() -> () {
 
 #[tauri::command]
 async fn screen_caching_start_btn_pressed() -> () {
-    println!("scren caching start execute");
-    caching_start_ffmepg_command().await;
+    let _variable_list = {
+        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
+        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
+    };
+    //start stream
+    unsafe{    
+        println!("record start btn execute");
+            //let result2 =  ;
+            if global_is_streaming == 0  {
+            match start_stream_ffmpeg_command() {
+                Ok(child) => {
+                    println!("Started ffmpeg process with PID: {}", child.id());
+                    // Do something with the child process here
+                    
+                        global_is_streaming = child.id() as u32;  
+                          println!("PID2a {}",global_is_streaming);
+                    
+                }
+                Err(e) => {
+                    println!("Error starting ffmpeg process: {}", e);     
+            }
+        }
+        //start segmentation
+        match stream_segmentation_ffmpeg_command(){
+            Ok(child) => {
+                println!("Started ffmpeg process with PID: {}", child.id());
+                // Do something with the child process here
+                
+                    global_is_segmenting = child.id() as u32;  
+                      println!("PID2a {}",global_is_segmenting);
+                
+            }
+            Err(e) => {
+                println!("Error starting ffmpeg process: {}", e);     
+        }
+        } 
+        delete_oldest(Path::new(_variable_list.stream_cache_dir.to_string().as_str()), (_variable_list.action_replay_dur * 2) as u64).await;
+    }
 }
+    
+}
+
 
 #[tauri::command]
 async fn screen_caching_stop_btn_pressed() -> () {
-    println!("screen caching stop execute");
-    //caching_stop_ffmpeg_command().await;
+    println!("screen cache stop button pressed" );
+    unsafe{
+       // println!("record stop execute2");
+            //let _result = send_input_to_pid(global_is_recording, "q" as &str);
+            if global_is_streaming != 0 {
+                //stop segmentation send signint not q
+            let _result1 = send_input_to_pid(global_is_segmenting, "q" as &str);
+            global_is_segmenting = 0;
+            let _result = send_input_to_pid(global_is_streaming, "q" as &str);
+            global_is_streaming = 0 as u32;
+        }
+        
+
+    }
+    
 }
 
 #[tauri::command]
@@ -350,6 +463,57 @@ struct  FfmpegVariables {
 //screen caching start stop
 //action replay exe
 //action replay and record start stop
+/*
+ -vcodec mpeg4 -q 12 -f mpegts udp://127.0.0.1:3000
+ */
+fn start_stream_ffmpeg_command() -> Result<std::process::Child, std::io::Error> {
+    let _variable_list = {
+        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
+        
+        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
+    };
+    let mut ffmpegcommand = Command::new("ffmpeg");
+    ffmpegcommand.arg("-hide_banner")
+    .arg("-f")
+    .arg("dshow")
+   // .arg("-ac")
+   // .arg("1")
+   // .arg("-ar")
+   // .arg("48000")
+     .arg("-i")
+     .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
+    .arg("-f")
+    .arg("dshow")
+    .arg("-i")
+    .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
+    .arg("-filter_complex")
+    .arg("amix=inputs=2")
+    .arg("-f")
+    .arg("gdigrab")
+    .arg("-framerate")
+    .arg(_variable_list.framerate.to_string().as_str())
+    .arg("-show_region")
+    //.arg(return_bool_int_string(_variable_list.show_region))
+    .arg("0")
+    .arg("-video_size")
+    .arg(_variable_list.video_size_x.to_string()
+    + "x"
+    + (_variable_list.video_size_y.to_string()).as_str(),)
+    .arg("-offset_x")
+    .arg(_variable_list.x_offset.to_string().as_str())
+    .arg("-offset_y")
+    .arg(_variable_list.y_offset.to_string().as_str())
+    .arg("-i")
+    .arg("desktop")
+    .arg("-vcodec")
+    .arg("mpeg4")
+    .arg("-f")
+    .arg("mpegts")
+    .arg(_variable_list.stream_port.to_string());
+    let child = ffmpegcommand.spawn()?;
+    Ok(child)
+}
+
 fn return_bool_int_string(x: bool) -> String {
     if x == true {
         return "1".to_string();
@@ -396,7 +560,7 @@ async fn screenshot_exe_ffmpeg_command() -> () {
             + (_variable_list.picture_format.to_string()).as_str(),
     )
 
-    .status().expect("DID NTO WORK LOSER");
+    .spawn().expect("DID NTO WORK LOSER");
 }
 async fn action_replay_exe_ffmpeg_command() -> () {
     println!("action replay exe ffmpeg command");
@@ -436,7 +600,7 @@ async fn action_replay_exe_ffmpeg_command() -> () {
     
 }
 
-async fn record_start_ffmepg_command() -> () {
+ fn record_start_ffmepg_command() -> Result<std::process::Child, std::io::Error> {
     println!("record start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
@@ -466,7 +630,8 @@ async fn record_start_ffmepg_command() -> () {
     .arg("-framerate")
     .arg(_variable_list.framerate.to_string().as_str())
     .arg("-show_region")
-    .arg(return_bool_int_string(_variable_list.show_region))
+    //.arg(return_bool_int_string(_variable_list.show_region))
+    .arg("0")
     .arg("-video_size")
     .arg(_variable_list.video_size_x.to_string()
     + "x"
@@ -479,100 +644,42 @@ async fn record_start_ffmepg_command() -> () {
     .arg("desktop")
     .arg("-strftime")
     .arg("1")
-    .arg( _variable_list.video_output_dir.to_string()
-    + "\\recording"
-    + (_variable_list.uniqe_file_name.to_string()).as_str()
-    + (_variable_list.video_format.to_string()).as_str());
-    ffmpegcommand.status().expect("DID NTO WORK LOSER");
-    //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
-}
-
-async fn record_stop_ffmpeg_command() -> () {
-    println!("record stop ffmpeg command");
-    let _variable_list = {
-        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-
-        
-        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
-    };
-
-    println!("Message from Rust: {}", _variable_list.stream_cache_dir);
-}
-
-async fn caching_start_ffmepg_command() -> () {
-    println!("caching start ffmpeg command");
-    let _variable_list = {
-        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-
-        
-        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
-    };
-    /*
-    ffmpeg -hide_banner -f dshow -ac 2 -ar 48000 -i
-     audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{D9AE870B-D51C-4050-A7DE-20475EE70F0E}" 
-     -f dshow -ac 1 -ar 48000 -i 
-     audio="@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{DE99F572-E285-4EBC-A263-2D782B212FA7}" 
-     -filter_complex amix=inputs=2 -f gdigrab -framerate 60 -show_region 1 -video_size 600x600 
-     -offset_x 10 -offset_y 20 -i desktop -vcodec mpeg4 -q 12 -f mpegts udp://127.0.0.1:3000
- */
-    let mut ffmpegcommand = Command::new("ffmpeg");
-    ffmpegcommand.arg("-hide_banner")
-    .arg("-y")
-    .arg("-f")
-    .arg("dshow")
-   // .arg("-ac")
-   // .arg("1")
-   // .arg("-ar")
-   // .arg("48000")
-     .arg("-i")
-     .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
-    .arg("-f")
-    .arg("dshow")
-    .arg("-i")
-    .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
-    .arg("-filter_complex")
-    .arg("amix=inputs=2")
-    .arg("-f")
-    .arg("gdigrab")
-    .arg("-framerate")
-    .arg(_variable_list.framerate.to_string().as_str())
-    .arg("-show_region")//comment out after testing
-    .arg(return_bool_int_string(_variable_list.show_region))//comment out after testing
-    .arg("-video_size")
-    .arg(_variable_list.video_size_x.to_string()
-    + "x"
-    + (_variable_list.video_size_y.to_string()).as_str())
-    .arg("-offset_x")
-    .arg(_variable_list.x_offset.to_string().as_str())
-    .arg("-offset_y")
-    .arg(_variable_list.y_offset.to_string().as_str())
-    .arg("-i")
-    .arg("desktop")
-    .arg("-vcodec")
-    .arg("mpeg4")
-    .arg("-q")
-    .arg("12")
     .arg("-f")
     .arg("mpegts")
-    .arg( _variable_list.stream_port.to_string().as_str());
-    
-    ffmpegcommand.status().expect("DID NTO WORK LOSER");
+    .arg( _variable_list.video_output_dir.to_string()
+    + "\\recording"
+    + current_datetime_string(_variable_list.uniqe_file_name.to_string()).as_str()
+    + (_variable_list.video_format.to_string()).as_str())
+    .stdin(Stdio::null())
+    .stdout(Stdio::null())
+    .stderr(Stdio::null());
+    let child = ffmpegcommand.spawn()?;
+    Ok(child)
     //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
-
-
-
-async fn caching_stop_ffmpeg_command() -> () {
-    println!("caching stop ffmpeg command");
-    let _variable_list = {
-        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-
-        
-        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
-    };
-    println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
 
-async fn stream_segmentation_ffmpeg_command() -> (){
+#[cfg(windows)]
+fn kill_process(pid: u32) -> Result<(), Error> {
+    Command::new("taskkill")
+        .arg("/PID")
+        .arg(pid.to_string())
+        .spawn()?
+        .wait()?;
+    Ok(())
+}
+
+#[cfg(not(windows))]
+fn kill_process(pid: u32) -> Result<(), Error> {
+    Command::new("kill")
+        .arg("-2")
+        .arg(pid.to_string())
+        .spawn()?
+        .wait()?;
+    Ok(())
+}
+
+
+fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::Error>{
     println!("caching start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
@@ -595,7 +702,10 @@ async fn stream_segmentation_ffmpeg_command() -> (){
     + "\\cache"
     + (_variable_list.uniqe_file_name.to_string()).as_str()
     + (_variable_list.video_format.to_string()).as_str());
-    ffmpegcommand.status().expect("DID NTO WORK LOSER");
+    let child = ffmpegcommand.spawn()?;
+    
+    Ok(child)
+}
 
 
     /*
@@ -603,7 +713,7 @@ async fn stream_segmentation_ffmpeg_command() -> (){
     -reset_timestamps 1 -segment_time 15 -min_seg_duration 00:00:15 
     -strftime 1 "F:\School\Capstone\FFMPEGCache\%Y-%m-%d_%H-%M-%S.mp4"
      */
-}
+
 
 async fn action_replay_and_record_start_ffmpeg_command() -> () {
     println!("action replay and record start ffmpeg command");
@@ -626,7 +736,7 @@ async fn action_replay_and_record_stop_ffmpeg_command() -> () {
     };
     println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
-
+/*
 fn return_audio_devices_ffmpeg_command() -> Result<String,Error> {
     let output = Command::new("ffmpeg")
     .arg("-hide_banner")
@@ -642,8 +752,45 @@ let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 println!("{:#?} test", stdout);
 Ok(stdout)
 }
+*/
 
-}
+
 
 //https://doc.rust-lang.org/std/process/struct.Stdio.html#method.piped
 //format("{#}")
+fn send_input_to_pid(pid: u32, input: &str) -> Result<(), std::io::Error> {
+    let handle: HANDLE = unsafe { OpenProcess(PROCESS_TERMINATE, 0, pid) };
+    if handle.is_null() {
+        return Err(std::io::Error::last_os_error());
+    }
+    unsafe { TerminateProcess(handle, 0) };
+    Ok(())
+}
+
+
+async fn delete_oldest(path: &Path,segment_time: u64 ){
+unsafe{
+while global_is_segmenting != 0 {
+    std::thread::sleep(std::time::Duration::from_secs(segment_time));
+    let entries = fs::read_dir(path).unwrap();
+    let mut files = vec![];
+
+    for entry in entries {
+        let entry = entry.unwrap();
+        let file_type = entry.file_type().unwrap();
+        if file_type.is_file() {
+            files.push((entry.path(), entry.metadata().unwrap().modified().unwrap()));
+        }
+    }
+
+    if files.len() >= 4 {
+        files.sort_by_key(|f| f.1);
+        let mut oldest_files = files.drain(0..files.len()-3);
+        for oldest_file in oldest_files {
+            fs::remove_file(oldest_file.0).unwrap();
+        }
+    }
+}
+}
+}
+

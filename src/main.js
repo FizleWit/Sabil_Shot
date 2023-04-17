@@ -44,8 +44,8 @@ async function write_data_to_json(){
     stream_cache_dir: document.querySelector("#video_caching_dir_data_id").value,
     video_output_dir: document.querySelector("#video_output_dir_data_id").value,
     action_replay_dur: parseInt(document.querySelector("#action_replay_data_id").value,10),
-    audio_format: "test",
-    video_format: "test",
+    audio_format: ".wav",
+    video_format: ".mp4",
     picture_format: ".jpeg"
   });
 }
