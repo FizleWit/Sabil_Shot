@@ -2,52 +2,33 @@
     all(not(debug_assertions), target_os = "windows"),
     windows_subsystem = "windows"
 )]
-use winapi::shared::minwindef::{DWORD, LPCVOID, LPVOID};
-//use std::{process::Command, string};
-use winapi::um::memoryapi::{WriteProcessMemory, VirtualAllocEx, VirtualFreeEx};
-use winapi::um::processthreadsapi::{GetCurrentProcessId, OpenProcess, TerminateProcess};
-use winapi::um::winnt::{MEM_COMMIT, MEM_RELEASE, PAGE_READWRITE, PROCESS_TERMINATE, PROCESS_VM_OPERATION, PROCESS_VM_WRITE, HANDLE,PROCESS_QUERY_INFORMATION};
-use std::process::{Command, Child};
-use std::convert::TryInto;
+// -hwaccel cuda flag for gpu passthrough reduces cpu bottlnecks tremendously
+
+use winapi::um::processthreadsapi::{ OpenProcess, TerminateProcess};
+use winapi::um::winnt::{PROCESS_TERMINATE,HANDLE};
+
+use std::process::Command;
+
 use std::fs;
 use std::path::Path;
 use std::io;
-//use std::io::{Error, ErrorKind};
-//use std::io::{Error, ErrorKind};
-//use std::process::{Command, Stdio};
-use std::ptr::null_mut;
-use std::ffi::OsStr;
-use std::os::windows::ffi::OsStrExt;
-//use winapi::um::processthreadsapi::{OpenProcess, TerminateProcess};
-use winapi::um::handleapi::CloseHandle;
-//use winapi::um::winnt::PROCESS_TERMINATE;
-use std::io::Write;
-//use std::process::{Command, Stdio};
-//use winapi::um::processthreadsapi::OpenProcess;
-use winapi::um::winnt::{PROCESS_ALL_ACCESS};
-//use std::ptr::null_mut;
-use winapi::um::winuser::{PostThreadMessageW, WM_CHAR};
-//use winapi::um::processthreadsapi::OpenProcess;
 
-//use winapi::um::memoryapi::WriteProcessMemory;
-//use std::process::Child;
-use std::io::{Error, ErrorKind};
+use std::io::Error;
 use serde_derive::{Deserialize, Serialize};
 
 use std::process::Stdio;
-use std::thread;
-use std::time::Duration;
-//use std::fmt;
+
+
 
 use std::str;
 extern crate serde_json;
 use chrono::{Utc, DateTime};
 //use async_process::Command;
 //use std::io::{Error, Write};
-static mut global_is_segmenting: u32 = 0 as u32;
-static mut global_is_streaming: u32 = 0 as u32;
-static mut global_is_recording: u32 = 0 as u32;
-static mut global_is_arandrec: u32 = 0 as u32;
+static mut GLOBAL_IS_SEGMENTING: u32 = 0 as u32;
+static mut GLOBAL_IS_STREAMING: u32 = 0 as u32;
+static mut GLOBAL_IS_RECORDING: u32 = 0 as u32;
+static mut GLOBAL_IS_ARR: u32 = 0 as u32;
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -120,6 +101,7 @@ fn test1_btn_pressed() -> () {
 #[tauri::command]
 async fn test2_btn_pressed() -> () {
    //stream_segmentation_ffmpeg_command().await;
+   println!("WOOHOOMADEIT");
 }
 
 
@@ -193,14 +175,14 @@ fn b_seetings_btn_pressed() -> () {
 unsafe{    
     println!("record start btn execute");
         //let result2 =  ;
-        if global_is_recording == 0 {
+        if GLOBAL_IS_RECORDING == 0 {
         match record_start_ffmepg_command() {
             Ok(child) => {
                 println!("Started ffmpeg process with PID: {}", child.id());
                 // Do something with the child process here
                 
-                    global_is_recording = child.id() as u32;  
-                      println!("PID2a {}",global_is_recording);
+                    GLOBAL_IS_RECORDING = child.id() as u32;  
+                      println!("PID2a {}",GLOBAL_IS_RECORDING);
                 
             }
             Err(e) => {
@@ -214,10 +196,18 @@ async fn record_stop_btn_pressed() -> () {
     println!("record stop execute");
     unsafe{
         println!("record stop execute2");
-            //let _result = send_input_to_pid(global_is_recording, "q" as &str);
-            if global_is_recording != 0 {
-            let _result = send_input_to_pid(global_is_recording, "q" as &str);
-            global_is_recording = 0 as u32;
+            //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
+            if GLOBAL_IS_RECORDING != 0 {
+         
+            match send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str).await {
+                Ok(_ok) => {  
+                    GLOBAL_IS_RECORDING = 0 as u32;
+                },
+                Err(e) => {
+                    println!("Bad happen {}",e);
+                }
+            }
+
         }
         
 
@@ -241,14 +231,14 @@ async fn screen_caching_start_btn_pressed() -> () {
     unsafe{    
         println!("record start btn execute");
             //let result2 =  ;
-            if global_is_streaming == 0  {
+            if GLOBAL_IS_STREAMING == 0  {
             match start_stream_ffmpeg_command() {
                 Ok(child) => {
                     println!("Started ffmpeg process with PID: {}", child.id());
                     // Do something with the child process here
                     
-                        global_is_streaming = child.id() as u32;  
-                          println!("PID2a {}",global_is_streaming);
+                        GLOBAL_IS_STREAMING = child.id() as u32;  
+                          println!("PID2a {}",GLOBAL_IS_STREAMING);
                     
                 }
                 Err(e) => {
@@ -257,14 +247,14 @@ async fn screen_caching_start_btn_pressed() -> () {
         }
     }
         //start segmentation
-        if global_is_segmenting == 0 {
+        if GLOBAL_IS_SEGMENTING == 0 {
         match stream_segmentation_ffmpeg_command(){
             Ok(child) => {
                 println!("Started ffmpeg process with PID: {}", child.id());
                 // Do something with the child process here
                 
-                    global_is_segmenting = child.id() as u32;  
-                      println!("PID2a {}",global_is_segmenting);
+                    GLOBAL_IS_SEGMENTING = child.id() as u32;  
+                      println!("PID2a {}",GLOBAL_IS_SEGMENTING);
                 
             }
             Err(e) => {
@@ -289,21 +279,28 @@ async fn screen_caching_stop_btn_pressed() -> () {
     };
     unsafe{
        // println!("record stop execute2");
-            //let _result = send_input_to_pid(global_is_recording, "q" as &str);
-            if global_is_segmenting != 0 as u32{
+            //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
+            if GLOBAL_IS_SEGMENTING != 0 as u32{
                 //stop segmentation send signint not q
-                match send_input_to_pid(global_is_segmenting, "q" as &str).await {
+                match send_input_to_pid(GLOBAL_IS_SEGMENTING, "q" as &str).await {
                     Ok(_ok) => {  
-                        global_is_segmenting = 0 as u32;
+                        GLOBAL_IS_SEGMENTING = 0 as u32;
                     },
                     Err(e) => {
                         println!("Bad happen {}",e);
                     }
                 }
             }
-            if global_is_streaming != 0 as u32{
-            let _result = send_input_to_pid(global_is_streaming, "q" as &str);
-            global_is_streaming = 0 as u32;
+            if GLOBAL_IS_STREAMING != 0 as u32{
+                match send_input_to_pid(GLOBAL_IS_STREAMING, "q" as &str).await {
+                    Ok(_ok) => {  
+                        GLOBAL_IS_STREAMING = 0 as u32;
+                    },
+                    Err(e) => {
+                        println!("Bad happen {}",e);
+                    }
+                }
+            GLOBAL_IS_STREAMING = 0 as u32;
             }
            
         }
@@ -319,14 +316,14 @@ async fn action_replay_exe_btn_pressed() -> () {
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     unsafe{
-        if global_is_segmenting != 0 {
+        if GLOBAL_IS_SEGMENTING != 0 {
             //is streaming 
-            match send_input_to_pid(global_is_segmenting, "q" as &str).await {
+            match send_input_to_pid(GLOBAL_IS_SEGMENTING, "q" as &str).await {
                 Ok(_ok) => {  
-                    global_is_segmenting = 0 as u32;
+                    GLOBAL_IS_SEGMENTING = 0 as u32;
                     if action_replay_exe_ffmpeg_command().await== false {
                       
-                         fix_Action_Replay().await;
+                        fix_action_replay().await;
                        if let Err(e) = fs::remove_file(Path::new(&(_variable_list.stream_cache_dir.to_string() + "\\ActionReplay.tempAR.mp4".to_string().as_str()))) {
                                    eprintln!("Error deleting file: {}", e);
                                }
@@ -339,7 +336,7 @@ async fn action_replay_exe_btn_pressed() -> () {
 
             
         }
-            println!("PID2a {}",global_is_segmenting);
+            println!("PID2a {}",GLOBAL_IS_SEGMENTING);
             //turn off segmentations
 
             //run action replay stuff
@@ -365,14 +362,14 @@ async fn action_replay_exe_btn_pressed() -> () {
 
             //turn on stream segmentation
              
-            if global_is_segmenting == 0 as u32 {
+            if GLOBAL_IS_SEGMENTING == 0 as u32 {
              match stream_segmentation_ffmpeg_command() {
                 Ok(child) => {
                     println!("Started ffmpeg process with PID: {}", child.id());
                     // Do something with the child process here
                     
-                        global_is_segmenting = child.id() as u32;  
-                          println!("PID2a {}",global_is_segmenting);
+                        GLOBAL_IS_SEGMENTING = child.id() as u32;  
+                          println!("PID2a {}",GLOBAL_IS_SEGMENTING);
                           delete_oldest(Path::new(_variable_list.stream_cache_dir.to_string().as_str()), (_variable_list.action_replay_dur * 2) as u64);
                     
                 }
@@ -388,13 +385,13 @@ async fn action_replay_exe_btn_pressed() -> () {
 #[tauri::command]
 async fn action_replay_and_record_btn_start_pressed() -> () {
     println!("action replay and record btn start execute");
-   // action_replay_and_record_start_ffmpeg_command().await;
+    action_replay_and_record_start_ffmpeg_command().await;
 }
 
 #[tauri::command]
 async fn action_replay_and_record_btn_stop_pressed() -> () {
     println!("action replay and record btn stop execute");
-   // action_replay_and_record_stop_ffmpeg_command().await;
+    action_replay_and_record_stop_ffmpeg_command().await;
 }
 #[tauri::command]
 fn return_framerate_data() -> i32 {
@@ -461,7 +458,7 @@ fn return_stream_port_data() -> String {
     return _variable_list.stream_port;
 }
 #[tauri::command]
-fn return_screenshot_output_dir_data() -> String {
+ fn return_screenshot_output_dir_data() -> String {
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -609,8 +606,7 @@ fn return_bool_int_string(x: bool) -> String {
         return "0".to_string();
     }
 }
-async fn fix_Action_Replay()  {
-
+async fn fix_action_replay()  {
     println!("action replay put file in right spot");
     //ffmpeg -sseof -6 -i output.mp4 -codec copy output2.mp4
    let _variable_list = {
@@ -636,7 +632,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     .stdout(Stdio::null())
     .stderr(Stdio::null());
     let mut child = ffmpegcommand2.spawn().expect("YOU LOSE ERROR");
-    let waiter = child.wait();
+    let _waiter = child.wait();
    
 }
  fn screenshot_exe_ffmpeg_command() -> () {
@@ -719,7 +715,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     "\\ActionReplay." + 
     filename.as_str()+ (_variable_list.video_format.to_string()).as_str());
     let mut child = ffmpegcommand.spawn().expect("workingweird");
-    let waiter = child.wait();
+    let _waiter = child.wait();
     
     return true;
     }
@@ -736,7 +732,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     "\\ActionReplay." + 
     "tempAR.mp4".to_string().as_str());
     let mut child = ffmpegcommand.spawn().expect("workingweird");
-    let waiter = child.wait();
+    let _waiter = child.wait();
     
     return false;
 
@@ -912,7 +908,7 @@ Ok(stdout)
 */
 //https://doc.rust-lang.org/std/process/struct.Stdio.html#method.piped
 //format("{#}")
-async fn send_input_to_pid(pid: u32, input: &str) -> Result<(), std::io::Error> {
+async fn send_input_to_pid(pid: u32, _input: &str) -> Result<(), std::io::Error> {
     let handle: HANDLE = unsafe { OpenProcess(PROCESS_TERMINATE, 0, pid) };
     if handle.is_null() {
         return Err(std::io::Error::last_os_error());
@@ -924,7 +920,7 @@ async fn send_input_to_pid(pid: u32, input: &str) -> Result<(), std::io::Error> 
 
 async fn delete_oldest(path: &Path,segment_time: u64 ){
 unsafe{
-while global_is_segmenting != 0 {
+while GLOBAL_IS_SEGMENTING != 0 {
     std::thread::sleep(std::time::Duration::from_secs(segment_time));
     let entries = fs::read_dir(path).unwrap();
     let mut files = vec![];
@@ -939,7 +935,7 @@ while global_is_segmenting != 0 {
 
     if files.len() >= 4 {
         files.sort_by_key(|f| f.1);
-        let mut oldest_files = files.drain(0..files.len()-3);
+        let oldest_files = files.drain(0..files.len()-3);
         for oldest_file in oldest_files {
             fs::remove_file(oldest_file.0).unwrap();
         }

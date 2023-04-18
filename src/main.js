@@ -7,17 +7,17 @@ const { invoke } = window.__TAURI__.tauri;
 
 
 async function read_data_to_html() {
-  document.querySelector("#screenshot_saving_dir_data_id").value =  await invoke("return_screenshot_output_dir_data");
-  document.querySelector("#video_output_dir_data_id").value = await invoke("return_video_output_dir_data");
-  document.querySelector("#video_caching_dir_data_id").value = await invoke("return_stream_cache_dir_data");
-  document.querySelector("#action_replay_data_id").value =await invoke("return_action_replay_dur_data");
+  document.querySelector("#screenshot_saving_dir_data_id").value = await invoke("return_screenshot_output_dir_data");
+  document.querySelector("#video_output_dir_data_id").value =  await invoke("return_video_output_dir_data");
+  document.querySelector("#video_caching_dir_data_id").value =  await invoke("return_stream_cache_dir_data");
+  document.querySelector("#action_replay_data_id").value =await  invoke("return_action_replay_dur_data");
   document.querySelector("#streaming_url_data_id").value = await invoke("return_stream_port_data");
-  document.querySelector("#unique_file_name_data_id").value =await invoke("return_unique_file_name_data");
+  document.querySelector("#unique_file_name_data_id").value = await invoke("return_unique_file_name_data");
   document.querySelector("#x_offset_data_id").value = await invoke("return_x_offset_data");
   document.querySelector("#y_offest_data_id").value = await invoke("return_y_offset_data");
-  document.querySelector("#region_size_x_data_id").value =await  invoke("return_video_size_x_data");
+  document.querySelector("#region_size_x_data_id").value = await invoke("return_video_size_x_data");
   document.querySelector("#region_size_y_data_id").value = await invoke("return_video_size_y_data");
-  document.querySelector("#show_region_data_id").checked =  await invoke("return_show_region_data");
+  document.querySelector("#show_region_data_id").checked = await  invoke("return_show_region_data");
   document.querySelector("#framerate_data_id").value =await invoke("return_framerate_data");
   document.querySelector("#microphone_audio_input_id").value = await invoke("return_micropohne_device_data");
   document.querySelector("#desktop_audio_input_id").value =  await invoke("return_desktop_device_data");
@@ -133,3 +133,4 @@ window.addEventListener("DOMContentLoaded", () => {
     .querySelector("#test1_btn_id")
     .addEventListener("click", () => invoke("test2_btn_pressed"));
 });
+
