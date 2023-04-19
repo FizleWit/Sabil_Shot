@@ -4,25 +4,23 @@
 )]
 // -hwaccel cuda flag for gpu passthrough reduces cpu bottlnecks tremendously
 
-use winapi::um::processthreadsapi::{ OpenProcess, TerminateProcess};
-use winapi::um::winnt::{PROCESS_TERMINATE,HANDLE};
+use winapi::um::processthreadsapi::{OpenProcess, TerminateProcess};
+use winapi::um::winnt::{HANDLE, PROCESS_TERMINATE};
 
 use std::process::Command;
 
 use std::fs;
-use std::path::Path;
 use std::io;
+use std::path::Path;
 
-use std::io::Error;
 use serde_derive::{Deserialize, Serialize};
+use std::io::Error;
 
 use std::process::Stdio;
 
-
-
 use std::str;
 extern crate serde_json;
-use chrono::{Utc, DateTime};
+use chrono::{DateTime, Utc};
 //use async_process::Command;
 //use std::io::{Error, Write};
 static mut GLOBAL_IS_SEGMENTING: u32 = 0 as u32;
@@ -36,9 +34,7 @@ fn greet(name: &str) -> String {
 }
 fn current_datetime_string(datetimeformat: String) -> String {
     let current_datetime: DateTime<Utc> = Utc::now();
-    current_datetime
-    .format(&datetimeformat)
-    .to_string()
+    current_datetime.format(&datetimeformat).to_string()
 }
 fn main() {
     //add javascript script file to html reminder
@@ -100,10 +96,9 @@ fn test1_btn_pressed() -> () {
 
 #[tauri::command]
 async fn test2_btn_pressed() -> () {
-   //stream_segmentation_ffmpeg_command().await;
-   //println!("WOOHOOMADEIT");
+    //stream_segmentation_ffmpeg_command().await;
+    //println!("WOOHOOMADEIT");
 }
-
 
 #[tauri::command(rename_all = "snake_case")]
 fn save_settings_btn_pressed(
@@ -133,7 +128,6 @@ fn save_settings_btn_pressed(
     let mut variables_list = {
         let variables_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
 
-        
         serde_json::from_str::<FfmpegVariables>(&variables_list).unwrap()
     };
     ////println!("framerate 1: {} + {}", variables_list.framerate, framerate);
@@ -171,48 +165,43 @@ fn b_seetings_btn_pressed() -> () {
 }
 
 #[tauri::command]
- async fn record_start_btn_pressed() -> () {
-unsafe{    
-    //println!("record start btn execute");
+async fn record_start_btn_pressed() -> () {
+    unsafe {
+        //println!("record start btn execute");
         //let result2 =  ;
         if GLOBAL_IS_RECORDING == 0 {
-        match record_start_ffmepg_command() {
-            Ok(child) => {
-                //println!("Started ffmpeg process with PID: {}", child.id());
-                // Do something with the child process here
-                
-                    GLOBAL_IS_RECORDING = child.id() as u32;  
-                      //println!("PID2a {}",GLOBAL_IS_RECORDING);
-                
+            match record_start_ffmepg_command() {
+                Ok(child) => {
+                    //println!("Started ffmpeg process with PID: {}", child.id());
+                    // Do something with the child process here
+
+                    GLOBAL_IS_RECORDING = child.id() as u32;
+                    //println!("PID2a {}",GLOBAL_IS_RECORDING);
+                }
+                Err(e) => {
+                    //println!("Error starting ffmpeg process: {}", e);
+                }
             }
-            Err(e) => {
-                //println!("Error starting ffmpeg process: {}", e);     
         }
     }
-}}
 }
 #[tauri::command]
 async fn record_stop_btn_pressed() -> () {
     //println!("record stop execute");
-    unsafe{
+    unsafe {
         //println!("record stop execute2");
-            //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
-            if GLOBAL_IS_RECORDING != 0 {
-         
+        //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
+        if GLOBAL_IS_RECORDING != 0 {
             match send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str).await {
-                Ok(_ok) => {  
+                Ok(_ok) => {
                     GLOBAL_IS_RECORDING = 0 as u32;
-                },
+                }
                 Err(e) => {
-                    //println!("Bad happen {}",e);
+                    println!("Bad happen {}", e);
                 }
             }
-
         }
-        
-
     }
-
 }
 
 #[tauri::command]
@@ -228,47 +217,45 @@ async fn screen_caching_start_btn_pressed() -> () {
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     //start stream
-    unsafe{    
+    unsafe {
         //println!("record start btn execute");
-            //let result2 =  ;
-            if GLOBAL_IS_STREAMING == 0  {
+        //let result2 =  ;
+        if GLOBAL_IS_STREAMING == 0 {
             match start_stream_ffmpeg_command() {
                 Ok(child) => {
                     //println!("Started ffmpeg process with PID: {}", child.id());
                     // Do something with the child process here
-                    
-                        GLOBAL_IS_STREAMING = child.id() as u32;  
-                          //println!("PID2a {}",GLOBAL_IS_STREAMING);
-                    
+
+                    GLOBAL_IS_STREAMING = child.id() as u32;
+                    //println!("PID2a {}",GLOBAL_IS_STREAMING);
                 }
                 Err(e) => {
-                    //println!("Error starting ffmpeg process: {}", e);     
+                    println!("Error starting ffmpeg process: {}", e);
+                }
+            }
+        }
+        //start segmentation
+        if GLOBAL_IS_SEGMENTING == 0 {
+            match stream_segmentation_ffmpeg_command() {
+                Ok(child) => {
+                    //println!("Started ffmpeg process with PID: {}", child.id());
+                    // Do something with the child process here
+
+                    GLOBAL_IS_SEGMENTING = child.id() as u32;
+                    //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
+                }
+                Err(e) => {
+                    println!("Error starting ffmpeg process: {}", e);
+                }
             }
         }
     }
-        //start segmentation
-        if GLOBAL_IS_SEGMENTING == 0 {
-        match stream_segmentation_ffmpeg_command(){
-            Ok(child) => {
-                //println!("Started ffmpeg process with PID: {}", child.id());
-                // Do something with the child process here
-                
-                    GLOBAL_IS_SEGMENTING = child.id() as u32;  
-                      //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
-                
-            }
-            Err(e) => {
-                //println!("Error starting ffmpeg process: {}", e);     
-        }
-        } 
-    } 
+    delete_oldest(
+        Path::new(_variable_list.stream_cache_dir.to_string().as_str()),
+        (_variable_list.action_replay_dur * 2) as u64,
+    )
+    .await;
 }
-     delete_oldest(Path::new(_variable_list.stream_cache_dir.to_string().as_str()), (_variable_list.action_replay_dur * 2) as u64).await;
-   
-}
-    
-
-
 
 #[tauri::command]
 async fn screen_caching_stop_btn_pressed() -> () {
@@ -277,110 +264,102 @@ async fn screen_caching_stop_btn_pressed() -> () {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    unsafe{
-       // //println!("record stop execute2");
-            //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
-            if GLOBAL_IS_SEGMENTING != 0 as u32{
-                //stop segmentation send signint not q
-                match send_input_to_pid(GLOBAL_IS_SEGMENTING, "q" as &str).await {
-                    Ok(_ok) => {  
-                        GLOBAL_IS_SEGMENTING = 0 as u32;
-                    },
-                    Err(e) => {
-                        //println!("Bad happen {}",e);
-                    }
+    unsafe {
+        // //println!("record stop execute2");
+        //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
+        if GLOBAL_IS_SEGMENTING != 0 as u32 {
+            //stop segmentation send signint not q
+            match send_input_to_pid(GLOBAL_IS_SEGMENTING, "q" as &str).await {
+                Ok(_ok) => {
+                    GLOBAL_IS_SEGMENTING = 0 as u32;
+                }
+                Err(e) => {
+                    println!("Bad happen {}", e);
                 }
             }
-            if GLOBAL_IS_STREAMING != 0 as u32{
-                match send_input_to_pid(GLOBAL_IS_STREAMING, "q" as &str).await {
-                    Ok(_ok) => {  
-                        GLOBAL_IS_STREAMING = 0 as u32;
-                    },
-                    Err(e) => {
-                        //println!("Bad happen {}",e);
-                    }
-                }
-            GLOBAL_IS_STREAMING = 0 as u32;
-            }
-           
         }
-           //  
+        if GLOBAL_IS_STREAMING != 0 as u32 {
+            match send_input_to_pid(GLOBAL_IS_STREAMING, "q" as &str).await {
+                Ok(_ok) => {
+                    GLOBAL_IS_STREAMING = 0 as u32;
+                }
+                Err(e) => {
+                    println!("Bad happen {}", e);
+                }
+            }
+            GLOBAL_IS_STREAMING = 0 as u32;
+        }
+    }
+    //
     std::thread::sleep(std::time::Duration::from_secs(2)); //ideally a wait for stream segmentation to be done but
-    delete_files_in_dir(_variable_list.stream_cache_dir.to_string().as_str()).unwrap();    
+    delete_files_in_dir(_variable_list.stream_cache_dir.to_string().as_str()).unwrap();
 }
 
 #[tauri::command]
 async fn action_replay_exe_btn_pressed() -> () {
-    let  _variable_list = {
+    let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    unsafe{
+    unsafe {
         if GLOBAL_IS_SEGMENTING != 0 {
-            //is streaming 
+            //is streaming
             match send_input_to_pid(GLOBAL_IS_SEGMENTING, "q" as &str).await {
-                Ok(_ok) => {  
+                Ok(_ok) => {
                     GLOBAL_IS_SEGMENTING = 0 as u32;
-                    if action_replay_exe_ffmpeg_command().await== false {
-                      
+                    if action_replay_exe_ffmpeg_command().await == false {
                         fix_action_replay().await;
-                       if let Err(e) = fs::remove_file(Path::new(&(_variable_list.stream_cache_dir.to_string() + "\\ActionReplay.tempAR.mp4".to_string().as_str()))) {
-                                   eprintln!("Error deleting file: {}", e);
-                               }
+                        if let Err(e) = fs::remove_file(Path::new(
+                            &(_variable_list.stream_cache_dir.to_string()
+                                + "\\ActionReplay.tempAR.mp4".to_string().as_str()),
+                        )) {
+                            eprintln!("Error deleting file: {}", e);
+                        }
                     }
-                },
+                }
                 Err(e) => {
-                    //println!("{} did not success kill process", e);
+                    println!("{} did not success kill process", e);
                 }
             }
-
-            
         }
-            //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
-            //turn off segmentations
+        //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
+        //turn off segmentations
 
-            //run action replay stuff
-          // let if_long_AR =  action_replay_exe_ffmpeg_command();
+        //run action replay stuff
+        // let if_long_AR =  action_replay_exe_ffmpeg_command();
 
         //  if action_replay_exe_ffmpeg_command().await== false {
-         //   fix_Action_Replay();
-         //   if let Err(e) = fs::remove_file(Path::new(&(_variable_list.stream_cache_dir.to_string() + "\\ActionReplay.tempAR.mp4".to_string().as_str()))) {
-         //       e//println!("Error deleting file: {}", e);
-         //   }
-            //delete temp file
+        //   fix_Action_Replay();
+        //   if let Err(e) = fs::remove_file(Path::new(&(_variable_list.stream_cache_dir.to_string() + "\\ActionReplay.tempAR.mp4".to_string().as_str()))) {
+        //       e//println!("Error deleting file: {}", e);
+        //   }
+        //delete temp file
         //  }
-         
 
-            
-           
+        //delete all files in directory
 
+        //turn on stream segmentation
 
-           
-
-            
-            //delete all files in directory
-
-            //turn on stream segmentation
-             
-            if GLOBAL_IS_SEGMENTING == 0 as u32 {
-             match stream_segmentation_ffmpeg_command() {
+        if GLOBAL_IS_SEGMENTING == 0 as u32 {
+            match stream_segmentation_ffmpeg_command() {
                 Ok(child) => {
                     //println!("Started ffmpeg process with PID: {}", child.id());
                     // Do something with the child process here
-                    
-                        GLOBAL_IS_SEGMENTING = child.id() as u32;  
-                          //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
-                          delete_oldest(Path::new(_variable_list.stream_cache_dir.to_string().as_str()), (_variable_list.action_replay_dur * 2) as u64);
-                    
+
+                    GLOBAL_IS_SEGMENTING = child.id() as u32;
+                    //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
+                    delete_oldest(
+                        Path::new(_variable_list.stream_cache_dir.to_string().as_str()),
+                        (_variable_list.action_replay_dur * 2) as u64,
+                    );
                 }
                 Err(e) => {
-                    //println!("Error starting ffmpeg process: {}", e);     
+                    println!("Error starting ffmpeg process: {}", e);
+                }
             }
-}  
-            }}}
-
-
-
+        }
+    }
+}
 
 #[tauri::command]
 async fn action_replay_and_record_btn_start_pressed() -> () {
@@ -458,7 +437,7 @@ fn return_stream_port_data() -> String {
     return _variable_list.stream_port;
 }
 #[tauri::command]
- fn return_screenshot_output_dir_data() -> String {
+fn return_screenshot_output_dir_data() -> String {
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -512,7 +491,7 @@ fn return_y_offset_data() -> i32 {
 //
 
 #[derive(Deserialize, Serialize, Debug)]
-struct  FfmpegVariables {
+struct FfmpegVariables {
     framerate: i32,
     show_region: bool,
     video_size_x: i32,
@@ -542,61 +521,62 @@ struct  FfmpegVariables {
 //action replay exe
 //action replay and record start stop
 /*
- -vcodec mpeg4 -q 12 -f mpegts udp://127.0.0.1:3000
- */
+-vcodec mpeg4 -q 12 -f mpegts udp://127.0.0.1:3000
+*/
 fn start_stream_ffmpeg_command() -> Result<std::process::Child, std::io::Error> {
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-        
+
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
-    ffmpegcommand.arg("-hide_banner")
-    .arg("-thread_queue_size")
-    .arg("5096")
-    .arg("-f")
-    .arg("dshow")
-   // .arg("-ac")
-   // .arg("1")
-   // .arg("-ar")
-   // .arg("48000")
-     .arg("-i")
-     .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
-    .arg("-f")
-    .arg("dshow")
-    .arg("-i")
-    .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
-    .arg("-filter_complex")
-    .arg("amix=inputs=2")
-    .arg("-f")
-    .arg("gdigrab")
-    .arg("-framerate")
-    .arg(_variable_list.framerate.to_string().as_str())
-    .arg("-show_region")
-    //.arg(return_bool_int_string(_variable_list.show_region))
-    .arg("0")
-    .arg("-video_size")
-    .arg(_variable_list.video_size_x.to_string()
-    + "x"
-    + (_variable_list.video_size_y.to_string()).as_str(),)
-    .arg("-offset_x")
-    .arg(_variable_list.x_offset.to_string().as_str())
-    .arg("-offset_y")
-    .arg(_variable_list.y_offset.to_string().as_str())
-    .arg("-i")
-    .arg("desktop")
-    .arg("-vcodec")
-    .arg("mpeg4")
-    .arg("-f")
-    .arg("mpegts")
-    .arg(_variable_list.stream_port.to_string())
-    .stdin(Stdio::null())
-    .stdout(Stdio::null())
-    .stderr(Stdio::null());
+    ffmpegcommand
+        .arg("-hide_banner")
+        .arg("-thread_queue_size")
+        .arg("5096")
+        .arg("-f")
+        .arg("dshow")
+        // .arg("-ac")
+        // .arg("1")
+        // .arg("-ar")
+        // .arg("48000")
+        .arg("-i")
+        .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
+        .arg("-f")
+        .arg("dshow")
+        .arg("-i")
+        .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
+        .arg("-filter_complex")
+        .arg("amix=inputs=2")
+        .arg("-f")
+        .arg("gdigrab")
+        .arg("-framerate")
+        .arg(_variable_list.framerate.to_string().as_str())
+        .arg("-show_region")
+        //.arg(return_bool_int_string(_variable_list.show_region))
+        .arg("0")
+        .arg("-video_size")
+        .arg(
+            _variable_list.video_size_x.to_string()
+                + "x"
+                + (_variable_list.video_size_y.to_string()).as_str(),
+        )
+        .arg("-offset_x")
+        .arg(_variable_list.x_offset.to_string().as_str())
+        .arg("-offset_y")
+        .arg(_variable_list.y_offset.to_string().as_str())
+        .arg("-i")
+        .arg("desktop")
+        .arg("-vcodec")
+        .arg("mpeg4")
+        .arg("-f")
+        .arg("mpegts")
+        .arg(_variable_list.stream_port.to_string())
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
     let child = ffmpegcommand.spawn()?;
     Ok(child)
-
-
 }
 
 fn return_bool_int_string(x: bool) -> String {
@@ -606,83 +586,86 @@ fn return_bool_int_string(x: bool) -> String {
         return "0".to_string();
     }
 }
-async fn fix_action_replay()  {
+async fn fix_action_replay() {
     //println!("action replay put file in right spot");
     //ffmpeg -sseof -6 -i output.mp4 -codec copy output2.mp4
-   let _variable_list = {
-    let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-    serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
-};
-let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string());
+    let _variable_list = {
+        let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
+        serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
+    };
+    let filename = current_datetime_string(_variable_list.uniqe_file_name.to_string());
     //trim output to correct directory
     //ffmpeg -sseof -15 -i ActionReplay.tempAR.mp4 output.mp4
     let mut ffmpegcommand2 = Command::new("./Data/sabilshotffmpeg");
     ffmpegcommand2
-    .arg("-sseof")
-    .arg("-".to_string() + _variable_list.action_replay_dur.to_string().as_str())
-    .arg("-i")
-    .arg(_variable_list.stream_cache_dir.to_string() + 
-    "\\ActionReplay.tempAR.mp4".to_string().as_str())
-    .arg("-codec")
-    .arg("copy")
-    .arg(_variable_list.video_output_dir.to_string() + 
-    "\\ActionReplay." + 
-    filename.as_str()+ (_variable_list.video_format.to_string()).as_str())
-    .stdin(Stdio::null())
-    .stdout(Stdio::null())
-    .stderr(Stdio::null());
+        .arg("-sseof")
+        .arg("-".to_string() + _variable_list.action_replay_dur.to_string().as_str())
+        .arg("-i")
+        .arg(
+            _variable_list.stream_cache_dir.to_string()
+                + "\\ActionReplay.tempAR.mp4".to_string().as_str(),
+        )
+        .arg("-codec")
+        .arg("copy")
+        .arg(
+            _variable_list.video_output_dir.to_string()
+                + "\\ActionReplay."
+                + filename.as_str()
+                + (_variable_list.video_format.to_string()).as_str(),
+        )
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
     let mut child = ffmpegcommand2.spawn().expect("YOU LOSE ERROR");
     let _waiter = child.wait();
-   
 }
- fn screenshot_exe_ffmpeg_command() -> () {
+fn screenshot_exe_ffmpeg_command() -> () {
     //println!("screenshot exe ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    let  _ffmpegcommand = Command::new("ffmpeg")
-    .arg("-hide_banner")
-    .arg("-y")
-    .arg("-f")
-    .arg("gdigrab")
-    .arg("-framerate")
-    .arg((_variable_list.framerate.to_string()).as_str())
-    .arg("-show_region")
-    .arg(return_bool_int_string(_variable_list.show_region))
-    .arg("-video_size")
-    .arg(
-        _variable_list.video_size_x.to_string()
-            + "x"
-            + (_variable_list.video_size_y.to_string()).as_str(),
-    )
-    .arg("-offset_x")
-    .arg((_variable_list.x_offset.to_string()).as_str())
-    .arg("-offset_y")
-    .arg((_variable_list.y_offset.to_string()).as_str())
-    .arg("-i")
-    .arg("desktop")
-    .arg("-frames:v")
-    .arg("1")
-    .arg("-strftime")
-    .arg("1")
-    .arg(
-        _variable_list.screenshot_output_dir.to_string()
-            + "\\ScreenShot."
-            + (_variable_list.uniqe_file_name.to_string()).as_str()
-            + (_variable_list.picture_format.to_string()).as_str(),
-    )    .stdin(Stdio::null())
-    .stdout(Stdio::null())
-    .stderr(Stdio::null()).spawn().expect("DID NTO WORK LOSER");
+    let _ffmpegcommand = Command::new("ffmpeg")
+        .arg("-hide_banner")
+        .arg("-y")
+        .arg("-f")
+        .arg("gdigrab")
+        .arg("-framerate")
+        .arg((_variable_list.framerate.to_string()).as_str())
+        .arg("-show_region")
+        .arg(return_bool_int_string(_variable_list.show_region))
+        .arg("-video_size")
+        .arg(
+            _variable_list.video_size_x.to_string()
+                + "x"
+                + (_variable_list.video_size_y.to_string()).as_str(),
+        )
+        .arg("-offset_x")
+        .arg((_variable_list.x_offset.to_string()).as_str())
+        .arg("-offset_y")
+        .arg((_variable_list.y_offset.to_string()).as_str())
+        .arg("-i")
+        .arg("desktop")
+        .arg("-frames:v")
+        .arg("1")
+        .arg("-strftime")
+        .arg("1")
+        .arg(
+            _variable_list.screenshot_output_dir.to_string()
+                + "\\ScreenShot."
+                + (_variable_list.uniqe_file_name.to_string()).as_str()
+                + (_variable_list.picture_format.to_string()).as_str(),
+        )
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .expect("DID NTO WORK LOSER");
 
-
-  
-
-//delete 
-
+    //delete
 }
 
- async fn action_replay_exe_ffmpeg_command() -> bool{
+async fn action_replay_exe_ffmpeg_command() -> bool {
     //if less then 2 files in directory (1) file in the directory grab the one file and return it
     //else merdge the two files name temp trim to video output and delete temp
 
@@ -691,114 +674,129 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string());
+    let filename = current_datetime_string(_variable_list.uniqe_file_name.to_string());
     //if files less than 2 files in directory
 
-    let mut files = fs::read_dir(_variable_list.stream_cache_dir.to_string()).unwrap()
+    let mut files = fs::read_dir(_variable_list.stream_cache_dir.to_string())
+        .unwrap()
         .filter_map(Result::ok)
         .filter(|entry| entry.file_type().unwrap().is_file())
         .collect::<Vec<_>>();
-    
+
     files.sort_by_key(|entry| entry.metadata().unwrap().modified().unwrap());
     files.reverse();
     let file_paths = files.iter().map(|entry| entry.path()).collect::<Vec<_>>();
     let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
-    if file_paths.len() < 2  {
+    if file_paths.len() < 2 {
         //return actionreplay to video directory only one file
 
-        
-        ffmpegcommand.arg("-hide_banner")
-        .arg("-y")
-        .arg("-i")
-        .arg(file_paths[0].to_str().unwrap())
-        .arg(_variable_list.video_output_dir.to_string() + 
-    "\\ActionReplay." + 
-    filename.as_str()+ (_variable_list.video_format.to_string()).as_str());
-    let mut child = ffmpegcommand.spawn().expect("workingweird");
-    let _waiter = child.wait();
-    
-    return true;
-    }
-    else{
+        ffmpegcommand
+            .arg("-hide_banner")
+            .arg("-y")
+            .arg("-i")
+            .arg(file_paths[0].to_str().unwrap())
+            .arg(
+                _variable_list.video_output_dir.to_string()
+                    + "\\ActionReplay."
+                    + filename.as_str()
+                    + (_variable_list.video_format.to_string()).as_str(),
+            );
+        let mut child = ffmpegcommand.spawn().expect("workingweird");
+        let _waiter = child.wait();
+
+        return true;
+    } else {
         //ffmpeg -i "concat:a.ts|b.ts" -codec copy output.mp4
-     
-    ffmpegcommand.arg("-hide_banner")
-    .arg("-y")
-    .arg("-i")
-    .arg("concat:".to_string() + file_paths[0].to_str().unwrap() + "|".to_string().as_str() + file_paths[1].to_str().unwrap())
-    .arg("-codec")
-    .arg("copy")
-    .arg(_variable_list.stream_cache_dir.to_string() + 
-    "\\ActionReplay." + 
-    "tempAR.mp4".to_string().as_str());
-    let mut child = ffmpegcommand.spawn().expect("workingweird");
-    let _waiter = child.wait();
-    
-    return false;
 
-    //segment temp file and write to video directory
-    //delete temp
+        ffmpegcommand
+            .arg("-hide_banner")
+            .arg("-y")
+            .arg("-i")
+            .arg(
+                "concat:".to_string()
+                    + file_paths[0].to_str().unwrap()
+                    + "|".to_string().as_str()
+                    + file_paths[1].to_str().unwrap(),
+            )
+            .arg("-codec")
+            .arg("copy")
+            .arg(
+                _variable_list.stream_cache_dir.to_string()
+                    + "\\ActionReplay."
+                    + "tempAR.mp4".to_string().as_str(),
+            );
+        let mut child = ffmpegcommand.spawn().expect("workingweird");
+        let _waiter = child.wait();
 
+        return false;
+
+        //segment temp file and write to video directory
+        //delete temp
+    }
+
+    //let child = ffmpegcommand.spawn()?;
+
+    //Ok(child)
 }
 
-//let child = ffmpegcommand.spawn()?;
-
-//Ok(child)
- }
-
- fn record_start_ffmepg_command() -> Result<std::process::Child, std::io::Error> {
+fn record_start_ffmepg_command() -> Result<std::process::Child, std::io::Error> {
     //println!("record start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
-        
+
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     //  -offset_x 10 -offset_y 20 -i desktop -strftime 1 "%Y-%m-%d_%H-%M-%S.mp4"
     let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
-    ffmpegcommand.arg("-hide_banner")
-    .arg("-y")
-    .arg("-f")
-    .arg("dshow")
-   // .arg("-ac")
-   // .arg("1")
-   // .arg("-ar")
-   // .arg("48000")
-     .arg("-i")
-     .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
-    .arg("-f")
-    .arg("dshow")
-    .arg("-i")
-    .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
-    .arg("-filter_complex")
-    .arg("amix=inputs=2")
-    .arg("-f")
-    .arg("gdigrab")
-    .arg("-framerate")
-    .arg(_variable_list.framerate.to_string().as_str())
-    .arg("-show_region")
-    //.arg(return_bool_int_string(_variable_list.show_region))
-    .arg("0")
-    .arg("-video_size")
-    .arg(_variable_list.video_size_x.to_string()
-    + "x"
-    + (_variable_list.video_size_y.to_string()).as_str(),)
-    .arg("-offset_x")
-    .arg(_variable_list.x_offset.to_string().as_str())
-    .arg("-offset_y")
-    .arg(_variable_list.y_offset.to_string().as_str())
-    .arg("-i")
-    .arg("desktop")
-    .arg("-strftime")
-    .arg("1")
-    .arg("-f")
-    .arg("mpegts")
-    .arg( _variable_list.video_output_dir.to_string()
-    + "\\Recording."
-    + current_datetime_string(_variable_list.uniqe_file_name.to_string()).as_str()
-    + (_variable_list.video_format.to_string()).as_str())
-    .stdin(Stdio::null())
-    .stdout(Stdio::null())
-    .stderr(Stdio::null());
+    ffmpegcommand
+        .arg("-hide_banner")
+        .arg("-y")
+        .arg("-f")
+        .arg("dshow")
+        // .arg("-ac")
+        // .arg("1")
+        // .arg("-ar")
+        // .arg("48000")
+        .arg("-i")
+        .arg("audio=".to_string() + _variable_list.microphone_device.to_string().as_str())
+        .arg("-f")
+        .arg("dshow")
+        .arg("-i")
+        .arg("audio=".to_string() + _variable_list.desktop_audio_device.to_string().as_str())
+        .arg("-filter_complex")
+        .arg("amix=inputs=2")
+        .arg("-f")
+        .arg("gdigrab")
+        .arg("-framerate")
+        .arg(_variable_list.framerate.to_string().as_str())
+        .arg("-show_region")
+        //.arg(return_bool_int_string(_variable_list.show_region))
+        .arg("0")
+        .arg("-video_size")
+        .arg(
+            _variable_list.video_size_x.to_string()
+                + "x"
+                + (_variable_list.video_size_y.to_string()).as_str(),
+        )
+        .arg("-offset_x")
+        .arg(_variable_list.x_offset.to_string().as_str())
+        .arg("-offset_y")
+        .arg(_variable_list.y_offset.to_string().as_str())
+        .arg("-i")
+        .arg("desktop")
+        .arg("-strftime")
+        .arg("1")
+        .arg("-f")
+        .arg("mpegts")
+        .arg(
+            _variable_list.video_output_dir.to_string()
+                + "\\Recording."
+                + current_datetime_string(_variable_list.uniqe_file_name.to_string()).as_str()
+                + (_variable_list.video_format.to_string()).as_str(),
+        )
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
     let child = ffmpegcommand.spawn()?;
     Ok(child)
     ////println!("Message from Rust: {}", _variable_list.stream_cache_dir);
@@ -824,56 +822,55 @@ fn kill_process(pid: u32) -> Result<(), Error> {
     Ok(())
 }
 
-
-fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::Error>{
+fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::Error> {
     //println!("caching start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    //delete_files_in_dir(_variable_list.stream_cache_dir.to_string().as_str()).unwrap();   
+    //delete_files_in_dir(_variable_list.stream_cache_dir.to_string().as_str()).unwrap();
     let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
-    ffmpegcommand.arg("-hide_banner")
-    .arg("-i")
-    .arg( _variable_list.stream_port.to_string().as_str())
-    .arg("-f")
-    .arg("segment")
-    .arg("-reset_timestamps")
-    .arg("1")
-    .arg("-segment_time")
-    .arg(_variable_list.action_replay_dur.to_string())
-    .arg("-min_seg_duration")
-    //.arg("00:00:".to_string() + _variable_list.action_replay_dur.to_string().as_str())
-    .arg(_variable_list.action_replay_dur.to_string().as_str())
-    .arg("-strftime")
-    .arg("1")
-    .arg( _variable_list.stream_cache_dir.to_string()
+    ffmpegcommand
+        .arg("-hide_banner")
+        .arg("-i")
+        .arg(_variable_list.stream_port.to_string().as_str())
+        .arg("-f")
+        .arg("segment")
+        .arg("-reset_timestamps")
+        .arg("1")
+        .arg("-segment_time")
+        .arg(_variable_list.action_replay_dur.to_string())
+        .arg("-min_seg_duration")
+        //.arg("00:00:".to_string() + _variable_list.action_replay_dur.to_string().as_str())
+        .arg(_variable_list.action_replay_dur.to_string().as_str())
+        .arg("-strftime")
+        .arg("1")
+        .arg(
+            _variable_list.stream_cache_dir.to_string()
     + "\\cache"
     + (_variable_list.uniqe_file_name.to_string()).as_str()
    // + (_variable_list.video_format.to_string()).as_str());
-   + ".ts".to_string().as_str())
-   .stdin(Stdio::null())
-   .stdout(Stdio::null())
-   .stderr(Stdio::null());
+   + ".ts".to_string().as_str(),
+        )
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null());
     let child = ffmpegcommand.spawn()?;
-    
+
     Ok(child)
 }
 
-
-    /*
-    ffmpeg -i udp://127.0.0.1:3000 -f segment 
-    -reset_timestamps 1 -segment_time 15 -min_seg_duration 00:00:15 
-    -strftime 1 "F:\School\Capstone\FFMPEGCache\%Y-%m-%d_%H-%M-%S.mp4"
-     */
-
+/*
+ffmpeg -i udp://127.0.0.1:3000 -f segment
+-reset_timestamps 1 -segment_time 15 -min_seg_duration 00:00:15
+-strftime 1 "F:\School\Capstone\FFMPEGCache\%Y-%m-%d_%H-%M-%S.mp4"
+ */
 
 async fn action_replay_and_record_start_ffmpeg_command() -> () {
     //println!("action replay and record start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
 
-        
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
@@ -884,7 +881,6 @@ async fn action_replay_and_record_stop_ffmpeg_command() -> () {
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
 
-        
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
@@ -900,7 +896,7 @@ fn return_audio_devices_ffmpeg_command() -> Result<String,Error> {
     .arg("-i")
     .arg("dummy")
     .output()?;
-    
+
 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
 //println!("{:#?} test", stdout);
 Ok(stdout)
@@ -917,34 +913,31 @@ async fn send_input_to_pid(pid: u32, _input: &str) -> Result<(), std::io::Error>
     Ok(())
 }
 
+async fn delete_oldest(path: &Path, segment_time: u64) {
+    unsafe {
+        while GLOBAL_IS_SEGMENTING != 0 {
+            std::thread::sleep(std::time::Duration::from_secs(segment_time));
+            let entries = fs::read_dir(path).unwrap();
+            let mut files = vec![];
 
-async fn delete_oldest(path: &Path,segment_time: u64 ){
-unsafe{
-while GLOBAL_IS_SEGMENTING != 0 {
-    std::thread::sleep(std::time::Duration::from_secs(segment_time));
-    let entries = fs::read_dir(path).unwrap();
-    let mut files = vec![];
+            for entry in entries {
+                let entry = entry.unwrap();
+                let file_type = entry.file_type().unwrap();
+                if file_type.is_file() {
+                    files.push((entry.path(), entry.metadata().unwrap().modified().unwrap()));
+                }
+            }
 
-    for entry in entries {
-        let entry = entry.unwrap();
-        let file_type = entry.file_type().unwrap();
-        if file_type.is_file() {
-            files.push((entry.path(), entry.metadata().unwrap().modified().unwrap()));
+            if files.len() >= 4 {
+                files.sort_by_key(|f| f.1);
+                let oldest_files = files.drain(0..files.len() - 3);
+                for oldest_file in oldest_files {
+                    fs::remove_file(oldest_file.0).unwrap();
+                }
+            }
         }
     }
-
-    if files.len() >= 4 {
-        files.sort_by_key(|f| f.1);
-        let oldest_files = files.drain(0..files.len()-3);
-        for oldest_file in oldest_files {
-            fs::remove_file(oldest_file.0).unwrap();
-        }
-    }
 }
-}
-}
-
-
 
 fn delete_files_in_dir(dir_path: &str) -> io::Result<()> {
     for entry in fs::read_dir(dir_path)? {
@@ -956,4 +949,3 @@ fn delete_files_in_dir(dir_path: &str) -> io::Result<()> {
     }
     Ok(())
 }
-
