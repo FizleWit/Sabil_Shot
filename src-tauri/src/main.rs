@@ -28,7 +28,7 @@ use chrono::{Utc, DateTime};
 static mut GLOBAL_IS_SEGMENTING: u32 = 0 as u32;
 static mut GLOBAL_IS_STREAMING: u32 = 0 as u32;
 static mut GLOBAL_IS_RECORDING: u32 = 0 as u32;
-static mut GLOBAL_IS_ARR: u32 = 0 as u32;
+//static mut GLOBAL_IS_ARR: u32 = 0 as u32;
 // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
 #[tauri::command]
 fn greet(name: &str) -> String {
@@ -75,24 +75,24 @@ fn main() {
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
-    println!("Message from Rust: {}", "Deon Game time");
+    //println!("Message from Rust: {}", "Deon Game time");
 }
 
 #[tauri::command]
 fn testfunction() -> () {
-    println!("Message from Rust: ");
+    //println!("Message from Rust: ");
 }
 
 #[tauri::command]
 fn test1_btn_pressed() -> () {
-    println!("Test1_btn_pressed execute");
+    //println!("Test1_btn_pressed execute");
     let mut _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
 
     _variable_list.stream_cache_dir = String::from("DEEON");
-    println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+    //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 
     let text = serde_json::to_string(&_variable_list).unwrap();
     fs::write("./Data/ffmpeg_variables.json", text).ok();
@@ -101,7 +101,7 @@ fn test1_btn_pressed() -> () {
 #[tauri::command]
 async fn test2_btn_pressed() -> () {
    //stream_segmentation_ffmpeg_command().await;
-   println!("WOOHOOMADEIT");
+   //println!("WOOHOOMADEIT");
 }
 
 
@@ -129,14 +129,14 @@ fn save_settings_btn_pressed(
     video_format: String,
     picture_format: String,
 ) -> () {
-    println!("save settings btn execute");
+    //println!("save settings btn execute");
     let mut variables_list = {
         let variables_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
 
         
         serde_json::from_str::<FfmpegVariables>(&variables_list).unwrap()
     };
-    //println!("framerate 1: {} + {}", variables_list.framerate, framerate);
+    ////println!("framerate 1: {} + {}", variables_list.framerate, framerate);
     variables_list.framerate = framerate;
     variables_list.show_region = show_region;
     variables_list.video_size_x = video_size_x;
@@ -161,41 +161,41 @@ fn save_settings_btn_pressed(
 
     let text = serde_json::to_string(&variables_list).unwrap();
     fs::write("./Data/ffmpeg_variables.json", text).ok();
-    //println!("framerate 1: {} + {}", variables_list.framerate, framerate);
-    //println!("save settings btn execute 2 ");
+    ////println!("framerate 1: {} + {}", variables_list.framerate, framerate);
+    ////println!("save settings btn execute 2 ");
 }
 
 #[tauri::command]
 fn b_seetings_btn_pressed() -> () {
-    println!("settings listview page button execute");
+    //println!("settings listview page button execute");
 }
 
 #[tauri::command]
  async fn record_start_btn_pressed() -> () {
 unsafe{    
-    println!("record start btn execute");
+    //println!("record start btn execute");
         //let result2 =  ;
         if GLOBAL_IS_RECORDING == 0 {
         match record_start_ffmepg_command() {
             Ok(child) => {
-                println!("Started ffmpeg process with PID: {}", child.id());
+                //println!("Started ffmpeg process with PID: {}", child.id());
                 // Do something with the child process here
                 
                     GLOBAL_IS_RECORDING = child.id() as u32;  
-                      println!("PID2a {}",GLOBAL_IS_RECORDING);
+                      //println!("PID2a {}",GLOBAL_IS_RECORDING);
                 
             }
             Err(e) => {
-                println!("Error starting ffmpeg process: {}", e);     
+                //println!("Error starting ffmpeg process: {}", e);     
         }
     }
 }}
 }
 #[tauri::command]
 async fn record_stop_btn_pressed() -> () {
-    println!("record stop execute");
+    //println!("record stop execute");
     unsafe{
-        println!("record stop execute2");
+        //println!("record stop execute2");
             //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
             if GLOBAL_IS_RECORDING != 0 {
          
@@ -204,7 +204,7 @@ async fn record_stop_btn_pressed() -> () {
                     GLOBAL_IS_RECORDING = 0 as u32;
                 },
                 Err(e) => {
-                    println!("Bad happen {}",e);
+                    //println!("Bad happen {}",e);
                 }
             }
 
@@ -217,7 +217,7 @@ async fn record_stop_btn_pressed() -> () {
 
 #[tauri::command]
 async fn screenshot_exe_btn_pressed() -> () {
-    println!("screenshot exe btn execute");
+    //println!("screenshot exe btn execute");
     screenshot_exe_ffmpeg_command();
 }
 
@@ -229,20 +229,20 @@ async fn screen_caching_start_btn_pressed() -> () {
     };
     //start stream
     unsafe{    
-        println!("record start btn execute");
+        //println!("record start btn execute");
             //let result2 =  ;
             if GLOBAL_IS_STREAMING == 0  {
             match start_stream_ffmpeg_command() {
                 Ok(child) => {
-                    println!("Started ffmpeg process with PID: {}", child.id());
+                    //println!("Started ffmpeg process with PID: {}", child.id());
                     // Do something with the child process here
                     
                         GLOBAL_IS_STREAMING = child.id() as u32;  
-                          println!("PID2a {}",GLOBAL_IS_STREAMING);
+                          //println!("PID2a {}",GLOBAL_IS_STREAMING);
                     
                 }
                 Err(e) => {
-                    println!("Error starting ffmpeg process: {}", e);     
+                    //println!("Error starting ffmpeg process: {}", e);     
             }
         }
     }
@@ -250,15 +250,15 @@ async fn screen_caching_start_btn_pressed() -> () {
         if GLOBAL_IS_SEGMENTING == 0 {
         match stream_segmentation_ffmpeg_command(){
             Ok(child) => {
-                println!("Started ffmpeg process with PID: {}", child.id());
+                //println!("Started ffmpeg process with PID: {}", child.id());
                 // Do something with the child process here
                 
                     GLOBAL_IS_SEGMENTING = child.id() as u32;  
-                      println!("PID2a {}",GLOBAL_IS_SEGMENTING);
+                      //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
                 
             }
             Err(e) => {
-                println!("Error starting ffmpeg process: {}", e);     
+                //println!("Error starting ffmpeg process: {}", e);     
         }
         } 
     } 
@@ -272,13 +272,13 @@ async fn screen_caching_start_btn_pressed() -> () {
 
 #[tauri::command]
 async fn screen_caching_stop_btn_pressed() -> () {
-    println!("screen cache stop button pressed" );
+    //println!("screen cache stop button pressed" );
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     unsafe{
-       // println!("record stop execute2");
+       // //println!("record stop execute2");
             //let _result = send_input_to_pid(GLOBAL_IS_RECORDING, "q" as &str);
             if GLOBAL_IS_SEGMENTING != 0 as u32{
                 //stop segmentation send signint not q
@@ -287,7 +287,7 @@ async fn screen_caching_stop_btn_pressed() -> () {
                         GLOBAL_IS_SEGMENTING = 0 as u32;
                     },
                     Err(e) => {
-                        println!("Bad happen {}",e);
+                        //println!("Bad happen {}",e);
                     }
                 }
             }
@@ -297,7 +297,7 @@ async fn screen_caching_stop_btn_pressed() -> () {
                         GLOBAL_IS_STREAMING = 0 as u32;
                     },
                     Err(e) => {
-                        println!("Bad happen {}",e);
+                        //println!("Bad happen {}",e);
                     }
                 }
             GLOBAL_IS_STREAMING = 0 as u32;
@@ -330,13 +330,13 @@ async fn action_replay_exe_btn_pressed() -> () {
                     }
                 },
                 Err(e) => {
-                    println!("{} did not success kill process", e);
+                    //println!("{} did not success kill process", e);
                 }
             }
 
             
         }
-            println!("PID2a {}",GLOBAL_IS_SEGMENTING);
+            //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
             //turn off segmentations
 
             //run action replay stuff
@@ -345,7 +345,7 @@ async fn action_replay_exe_btn_pressed() -> () {
         //  if action_replay_exe_ffmpeg_command().await== false {
          //   fix_Action_Replay();
          //   if let Err(e) = fs::remove_file(Path::new(&(_variable_list.stream_cache_dir.to_string() + "\\ActionReplay.tempAR.mp4".to_string().as_str()))) {
-         //       eprintln!("Error deleting file: {}", e);
+         //       e//println!("Error deleting file: {}", e);
          //   }
             //delete temp file
         //  }
@@ -365,16 +365,16 @@ async fn action_replay_exe_btn_pressed() -> () {
             if GLOBAL_IS_SEGMENTING == 0 as u32 {
              match stream_segmentation_ffmpeg_command() {
                 Ok(child) => {
-                    println!("Started ffmpeg process with PID: {}", child.id());
+                    //println!("Started ffmpeg process with PID: {}", child.id());
                     // Do something with the child process here
                     
                         GLOBAL_IS_SEGMENTING = child.id() as u32;  
-                          println!("PID2a {}",GLOBAL_IS_SEGMENTING);
+                          //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
                           delete_oldest(Path::new(_variable_list.stream_cache_dir.to_string().as_str()), (_variable_list.action_replay_dur * 2) as u64);
                     
                 }
                 Err(e) => {
-                    println!("Error starting ffmpeg process: {}", e);     
+                    //println!("Error starting ffmpeg process: {}", e);     
             }
 }  
             }}}
@@ -384,13 +384,13 @@ async fn action_replay_exe_btn_pressed() -> () {
 
 #[tauri::command]
 async fn action_replay_and_record_btn_start_pressed() -> () {
-    println!("action replay and record btn start execute");
+    //println!("action replay and record btn start execute");
     action_replay_and_record_start_ffmpeg_command().await;
 }
 
 #[tauri::command]
 async fn action_replay_and_record_btn_stop_pressed() -> () {
-    println!("action replay and record btn stop execute");
+    //println!("action replay and record btn stop execute");
     action_replay_and_record_stop_ffmpeg_command().await;
 }
 #[tauri::command]
@@ -483,7 +483,7 @@ fn return_video_output_dir_data() -> String {
 }
 #[tauri::command]
 fn return_action_replay_dur_data() -> i32 {
-    println!("return action replay data dur");
+    //println!("return action replay data dur");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -492,7 +492,7 @@ fn return_action_replay_dur_data() -> i32 {
 }
 #[tauri::command]
 fn return_x_offset_data() -> i32 {
-    println!("return offset data");
+    //println!("return offset data");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -501,7 +501,7 @@ fn return_x_offset_data() -> i32 {
 }
 #[tauri::command]
 fn return_y_offset_data() -> i32 {
-    println!("return offset data");
+    //println!("return offset data");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -607,7 +607,7 @@ fn return_bool_int_string(x: bool) -> String {
     }
 }
 async fn fix_action_replay()  {
-    println!("action replay put file in right spot");
+    //println!("action replay put file in right spot");
     //ffmpeg -sseof -6 -i output.mp4 -codec copy output2.mp4
    let _variable_list = {
     let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
@@ -636,7 +636,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
    
 }
  fn screenshot_exe_ffmpeg_command() -> () {
-    println!("screenshot exe ffmpeg command");
+    //println!("screenshot exe ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -668,7 +668,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     .arg("1")
     .arg(
         _variable_list.screenshot_output_dir.to_string()
-            + "\\"
+            + "\\ScreenShot."
             + (_variable_list.uniqe_file_name.to_string()).as_str()
             + (_variable_list.picture_format.to_string()).as_str(),
     )    .stdin(Stdio::null())
@@ -686,7 +686,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     //if less then 2 files in directory (1) file in the directory grab the one file and return it
     //else merdge the two files name temp trim to video output and delete temp
 
-    println!("action replay exe ffmpeg command");
+    //println!("action replay exe ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -747,7 +747,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
  }
 
  fn record_start_ffmepg_command() -> Result<std::process::Child, std::io::Error> {
-    println!("record start ffmpeg command");
+    //println!("record start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         
@@ -793,7 +793,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     .arg("-f")
     .arg("mpegts")
     .arg( _variable_list.video_output_dir.to_string()
-    + "\\recording"
+    + "\\Recording."
     + current_datetime_string(_variable_list.uniqe_file_name.to_string()).as_str()
     + (_variable_list.video_format.to_string()).as_str())
     .stdin(Stdio::null())
@@ -801,7 +801,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     .stderr(Stdio::null());
     let child = ffmpegcommand.spawn()?;
     Ok(child)
-    //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+    ////println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
 
 #[cfg(windows)]
@@ -826,7 +826,7 @@ fn kill_process(pid: u32) -> Result<(), Error> {
 
 
 fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::Error>{
-    println!("caching start ffmpeg command");
+    //println!("caching start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
@@ -869,25 +869,25 @@ fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::
 
 
 async fn action_replay_and_record_start_ffmpeg_command() -> () {
-    println!("action replay and record start ffmpeg command");
+    //println!("action replay and record start ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
 
         
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+    //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
 
 async fn action_replay_and_record_stop_ffmpeg_command() -> () {
-    println!("action replay and record stop ffmpeg command");
+    //println!("action replay and record stop ffmpeg command");
     let _variable_list = {
         let _variable_list = std::fs::read_to_string("./Data/ffmpeg_variables.json").unwrap();
 
         
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    println!("Message from Rust: {}", _variable_list.stream_cache_dir);
+    //println!("Message from Rust: {}", _variable_list.stream_cache_dir);
 }
 /*
 fn return_audio_devices_ffmpeg_command() -> Result<String,Error> {
@@ -902,7 +902,7 @@ fn return_audio_devices_ffmpeg_command() -> Result<String,Error> {
     .output()?;
     
 let stdout = String::from_utf8_lossy(&output.stdout).to_string();
-println!("{:#?} test", stdout);
+//println!("{:#?} test", stdout);
 Ok(stdout)
 }
 */

@@ -63,10 +63,10 @@
     "windows": [
       {
         "fullscreen": false,
-        "height": 600,
+        "height": 1200,
         "resizable": true,
-        "title": "sabil_shot_3_22",
-        "width": 800
+        "title": "Sabil Shot",
+        "width": 770
       }
     ]
   }
