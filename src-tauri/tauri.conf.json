@@ -12,9 +12,9 @@
   },
   "tauri": {
     "allowlist": {
-      "all": false,
+      "all": true,
       "shell": {
-        "all": false,
+        "all": true,
         "open": true
       }
     },
@@ -42,7 +42,10 @@
         "providerShortName": null,
         "signingIdentity": null
       },
-      "resources": [],
+
+"resources": [
+        "Data/*"
+      ],
       "shortDescription": "",
       "targets": "all",
       "windows": {

@@ -550,7 +550,7 @@ fn start_stream_ffmpeg_command() -> Result<std::process::Child, std::io::Error> 
         
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
-    let mut ffmpegcommand = Command::new("ffmpeg");
+    let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
     ffmpegcommand.arg("-hide_banner")
     .arg("-thread_queue_size")
     .arg("5096")
@@ -616,7 +616,7 @@ async fn fix_action_replay()  {
 let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string());
     //trim output to correct directory
     //ffmpeg -sseof -15 -i ActionReplay.tempAR.mp4 output.mp4
-    let mut ffmpegcommand2 = Command::new("ffmpeg");
+    let mut ffmpegcommand2 = Command::new("./Data/sabilshotffmpeg");
     ffmpegcommand2
     .arg("-sseof")
     .arg("-".to_string() + _variable_list.action_replay_dur.to_string().as_str())
@@ -702,7 +702,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
     files.sort_by_key(|entry| entry.metadata().unwrap().modified().unwrap());
     files.reverse();
     let file_paths = files.iter().map(|entry| entry.path()).collect::<Vec<_>>();
-    let mut ffmpegcommand = Command::new("ffmpeg");
+    let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
     if file_paths.len() < 2  {
         //return actionreplay to video directory only one file
 
@@ -754,7 +754,7 @@ let filename =current_datetime_string(_variable_list.uniqe_file_name.to_string()
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     //  -offset_x 10 -offset_y 20 -i desktop -strftime 1 "%Y-%m-%d_%H-%M-%S.mp4"
-    let mut ffmpegcommand = Command::new("ffmpeg");
+    let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
     ffmpegcommand.arg("-hide_banner")
     .arg("-y")
     .arg("-f")
@@ -832,7 +832,7 @@ fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::
         serde_json::from_str::<FfmpegVariables>(&_variable_list).unwrap()
     };
     //delete_files_in_dir(_variable_list.stream_cache_dir.to_string().as_str()).unwrap();   
-    let mut ffmpegcommand = Command::new("ffmpeg");
+    let mut ffmpegcommand = Command::new("./Data/sabilshotffmpeg");
     ffmpegcommand.arg("-hide_banner")
     .arg("-i")
     .arg( _variable_list.stream_port.to_string().as_str())

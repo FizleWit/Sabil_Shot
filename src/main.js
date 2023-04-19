@@ -60,77 +60,110 @@ function testDirectoryResult(){
   console.log(document.querySelector("#screenshot_saving_dir_data_id").value);
 }
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#save_settings_btn_id")
+    .querySelector("#save_settings_btn_id");
+    if (el)
+    el
     //.addEventListener("click", () => write_data_to_json());
     .addEventListener("click",  () =>write_data_to_json());
 });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", event => {
+  const el =
   document
-    .querySelector("#Load_settings_btn_id")
+    .querySelector("#load_settings_btn_id");
+    if (el)
+    el
     .addEventListener("click", () => read_data_to_html());
 });
 
 //recording buttons
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#recording_btn_start_id")
+    .querySelector("#recording_btn_start_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("record_start_btn_pressed"));
 });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#recording_btn_stop_id")
+    .querySelector("#recording_btn_stop_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("record_stop_btn_pressed"));
 });
 
 
 //screenshot buttons
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#screenshot_btn_exe_id")
+    .querySelector("#screenshot_btn_exe_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("screenshot_exe_btn_pressed"));
 });
 
 
 //screen caching buttons
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#screen_caching_btn_start_id")
+    .querySelector("#screen_caching_btn_start_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("screen_caching_start_btn_pressed"));
 });
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#screen_caching_btn_stop_id")
+    .querySelector("#screen_caching_btn_stop_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("screen_caching_stop_btn_pressed"));
 });
 
 
 //action replay button
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#action_replay_btn_exe_id")
+    .querySelector("#action_replay_btn_exe_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("action_replay_exe_btn_pressed"));
 });
 
 
 //Action Replay & Record
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#action_replay_and_record_btn_start_id")
+    .querySelector("#action_replay_and_record_btn_start_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("action_replay_and_record_btn_start_pressed"));
 });
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#action_replay_and_record_btn_stop_id")
+    .querySelector("#action_replay_and_record_btn_stop_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("action_replay_and_record_btn_stop_pressed"));
 });
 
-window.addEventListener("DOMContentLoaded", () => {
+window.addEventListener("DOMContentLoaded", (event) => {
+  const el =
   document
-    .querySelector("#test1_btn_id")
+    .querySelector("#test1_btn_id");
+    if (el)
+    el
     .addEventListener("click", () => invoke("test2_btn_pressed"));
 });
 

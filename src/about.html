@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" style="--bs-body-bg: var(--bs-success);">
+<html lang="en" style="--bs-body-bg: var(--bs-primary);">
 
 <head>
     <meta charset="utf-8">
@@ -11,14 +11,13 @@
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700,400italic,700italic&amp;display=swap">
     <link rel="stylesheet" href="assets/fonts/font-awesome.min.css">
     <script type="module" src="main.js" defer></script>
-
 </head>
 
-<body id="page-top" data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-offset="72">
+<body id="page-top" data-bs-spy="scroll" data-bs-target="#mainNav" data-bs-offset="72" style="--bs-body-bg: rgb(40,56,72);">
     <nav class="navbar navbar-light navbar-expand-lg fixed-top bg-secondary text-uppercase" id="mainNav">
         <div class="container"><a class="navbar-brand" href="#page-top">Sabil Shot</a><button data-bs-toggle="collapse" data-bs-target="#navbarResponsive" class="navbar-toggler text-white bg-primary navbar-toggler-right text-uppercase rounded" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation"><i class="fa fa-magic"></i></button>
             <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul id="navBar_about" class="navbar-nav ms-auto">
+                <ul class="navbar-nav ms-auto">
                     <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" id="c_actions_page_btn_id" href="index.html">Actions</a></li>
                     <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" id="c_settings_page_btn_id" href="settings.html">Settings</a></li>
                     <li class="nav-item mx-0 mx-lg-1"><a class="nav-link py-3 px-0 px-lg-3 rounded" id="c_about_page_btn_id" href="about.html" style="text-decoration:  underline;">About</a></li>
@@ -29,12 +28,18 @@
     <header class="text-center text-white bg-primary masthead">
         <div class="container">
             <header>
-                <p>THIS IS THE HEADER</p>
-                <p>THE APP IS THIS&nbsp;</p>
+                <div class="row">
+                    <div class="col">
+                        <p style="position: sticky;">Sabil Shot was designed by Amine Sabil as a Capstone Project in 2023.&nbsp;<br>It was designed with Tauri and Rust. Its purpose is to create recordings and cache the screen incase you ever want to record something that just happened. To record desktop audio you must have a Stereo Mix device setup and enabled and install FFMPEG and add it to the your path.&nbsp;<br><br></p>
+                    </div>
+                    <div class="col">
+                        <p>The capturing of audio and video devices is handled through FFMPEG. Currently this app is only supported for Windows.&nbsp; Plans, known bugs, and feature requests can all be made on the GitHub page. To use a specific device you must know the devices name as FFMPEG knows it. The easiest way to get it is with a list_devices command. More information is available on the GitHub page.&nbsp;</p>
+                    </div>
+                </div>
             </header>
-        </div>
+        </div><a class="stretched-link" href="https://github.com/FizleWit/sabil_shot_3_22" style="position: relative;display: inline-block;">Lin<i class="fa fa-github fa-stack-1x fa-inverse" style="width: 100px;text-align: center;height: 75px;position: relative;font-size: 77px;"></i>k</a>
     </header>
-    <div class="text-center text-white copyright py-4">
+    <div class="text-center text-white copyright py-4" style="background: rgb(40, 56, 72);--bs-body-bg: rgb(40,56,72);">
         <div class="container"><small>Copyright ©&nbsp;Sabil Shot 2023</small></div>
     </div>
     <script src="assets/bootstrap/js/bootstrap.min.js"></script>
