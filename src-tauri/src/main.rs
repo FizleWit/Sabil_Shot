@@ -19,7 +19,7 @@ use std::io::Error;
 use std::process::Stdio;
 
 use std::str;
-extern crate serde_json;
+//extern crate serde_json;
 use chrono::{DateTime, Utc};
 //use async_process::Command;
 //use std::io::{Error, Write};
@@ -322,24 +322,6 @@ async fn action_replay_exe_btn_pressed() -> () {
                 }
             }
         }
-        //println!("PID2a {}",GLOBAL_IS_SEGMENTING);
-        //turn off segmentations
-
-        //run action replay stuff
-        // let if_long_AR =  action_replay_exe_ffmpeg_command();
-
-        //  if action_replay_exe_ffmpeg_command().await== false {
-        //   fix_Action_Replay();
-        //   if let Err(e) = fs::remove_file(Path::new(&(_variable_list.stream_cache_dir.to_string() + "\\ActionReplay.tempAR.mp4".to_string().as_str()))) {
-        //       e//println!("Error deleting file: {}", e);
-        //   }
-        //delete temp file
-        //  }
-
-        //delete all files in directory
-
-        //turn on stream segmentation
-
         if GLOBAL_IS_SEGMENTING == 0 as u32 {
             match stream_segmentation_ffmpeg_command() {
                 Ok(child) => {
@@ -821,6 +803,7 @@ fn kill_process(pid: u32) -> Result<(), Error> {
         .wait()?;
     Ok(())
 }
+
 
 fn stream_segmentation_ffmpeg_command() -> Result<std::process::Child, std::io::Error> {
     //println!("caching start ffmpeg command");
