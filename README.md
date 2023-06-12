@@ -62,7 +62,7 @@ Search your computers settings for display and copy the **Display Resolution** t
 2. Rust
 3. [Cargo](https://crates.io/) (Rusts package manager)
 
-Clone the repo and go to the file in your command line
+Clone the repo and go to the directory in your command line
 
 run the command:
 
