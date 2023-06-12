@@ -81,7 +81,11 @@ Recordings: When you press the start recording button FFMPEG starts making an .m
 
 Screen Caching: When started temp files that are identical in context to the recordings are created at the duration specified for the action replays and saved to the caching directory. Stopping this deletes everything inside the file and stops the creation of the temp files for the time being. 
 
-Action Replay: If executed and screen caching is enabled the caching will be temporarily disabled, the two newest files in the directory will be merdged and a clip will be saved to the recordings directory that is the duration of the action replay from the end of the new file. The temp merdged file will be deleted and the caching will continue again.
+Action Replay: If executed and screen caching is enabled the caching will be temporarily disabled, the two newest files in the directory will be merdged and a clip will be saved to the recordings directory that is the duration of the action replay from the end of the new file. The temp merdged file will be deleted and the caching will continue again. 
+This video demonstrates the action replay in action!
+
+https://github.com/FizleWit/Sabil_Shot/assets/77703578/c11bedbe-d3c4-40b6-88ad-5d2dce0420c8
+
 
 ## Known Bugs
 
