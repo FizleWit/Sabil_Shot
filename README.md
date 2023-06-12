@@ -1,6 +1,7 @@
 # Sabil Shot
 ## A screen Recording and Action Replay desktop solution written in Rust and utilizing Tauri. 
- 	![Header Pictures](https://github.com/FizleWit/Sabil_Shot/blob/main/readmeFiles/ssMainPage.png?raw=true "Title")
+ ![ssMainPage](https://github.com/FizleWit/Sabil_Shot/assets/77703578/71f9c160-e783-4cd2-8a55-dfab7dafdbde)
+
 
 This project was created for my Capstone. It is a desktop application to that is designed to assist you in taking screenshots, recording desktop video, desktop audio, and microphone audio. There is also a feature for action replay. 
 
@@ -28,6 +29,11 @@ This whole project is avaliable open source and utilizes the following:
 5. Before utilizing the app you will also have to figure out your unique device names for the settings page.
 run the command: 
  `ffmpeg -hide_banner -list_devices true -f dshow -i dummy`
+ 
+ This is what it will look like: 
+ ![image](https://github.com/FizleWit/Sabil_Shot/assets/77703578/5203df42-3273-453a-9b88-bc3a678cd716)
+ 
+ 
  and take note of the device names inbetween the quotation marks save the exact name of your micrphone and desktop stero mix device, for me it was 
  Microphone: [dshow @ 000001b17421e600] "**Microphone (Arctis Nova Pro Wireless)**" (audio)
 [dshow @ 000001b17421e600]   Alternative name "@device_cm_{33D9A762-90C8-11D0-BD43-00A0C911CE86}\wave_{DE99F572-E285-4EBC-A263-2D782B212FA7}"
@@ -66,6 +72,8 @@ you will start a live development environment for the application from there. Mo
 
 
 ## Features
+
+![ssSettingsPage](https://github.com/FizleWit/Sabil_Shot/assets/77703578/994d1d9b-5f71-4649-a49a-7d1c02b52298)
 
 Screenshots! When you press the screenshot button an FFMPEG command is ran that uses the variables from the settings page to take a screenshot of your display in the region specified with the offsets specified
 
