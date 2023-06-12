@@ -25,13 +25,7 @@ This whole project is avaliable open source and utilizes the following:
     4a. Cache folder for the temp files of the action replay to be saved to, this folders context will be deleted when the action replay is turned off. Do not store essential files in this folder.
     4b. Screenshot folder for screenshots created by the application
     4c. Recordings folder for the output of  action replay and recording videos.
-
-## Install for use
-
-* To install for general end user use you must have finished the before you install steps first.
-* Download and run the .msi file from the releases section of this github page, follow the instructions from there.
-
-Before utilizing the app you will also have to figure out your unique device names for the settings page.
+5. Before utilizing the app you will also have to figure out your unique device names for the settings page.
 run the command: 
  `ffmpeg -hide_banner -list_devices true -f dshow -i dummy`
  and take note of the device names inbetween the quotation marks save the exact name of your micrphone and desktop stero mix device, for me it was 
@@ -43,9 +37,16 @@ Desktop Audio: [dshow @ 000001b17421e600] "**What U Hear (Sound Blaster Audigy 5
 
 You want to use what is in bold but if that does not work for you try the alternative names. These are the names for the Audio Sources. 
 
-You will also need to know the region of your screen you want to capture or offsets if you would prefer. If the region you configure is not within your displays range the app will crash. 
+6. You will also need to know the region of your screen you want to capture or offsets if you would prefer. If the region you configure is not within your displays range the app will crash. 
 
 Search your computers settings for display and copy the **Display Resolution** to know the maximum size you can record.
+
+
+## Install for use
+
+* To install for general end user use you must have finished the before you install steps first.
+* Download and run the .msi file from the releases section of this github page, follow the instructions from there.
+
 
 ## Install for personal development
 
@@ -65,6 +66,14 @@ you will start a live development environment for the application from there. Mo
 
 
 ## Features
+
+Screenshots! When you press the screenshot button an FFMPEG command is ran that uses the variables from the settings page to take a screenshot of your display in the region specified with the offsets specified
+
+Recordings: When you press the start recording button FFMPEG starts making an .mp4 file that has video of the region specified and will also include the audio streams of the two configured audio devices, microphone, and stereo mix for desktop audio. Pressing stop will finish writing the .mp4 file and put it in the Recordings output directory where specified in the settings.
+
+Screen Caching: When started temp files that are identical in context to the recordings are created at the duration specified for the action replays and saved to the caching directory. Stopping this deletes everything inside the file and stops the creation of the temp files for the time being. 
+
+Action Replay: If executed and screen caching is enabled the caching will be temporarily disabled, the two newest files in the directory will be merdged and a clip will be saved to the recordings directory that is the duration of the action replay from the end of the new file. The temp merdged file will be deleted and the caching will continue again.
 
 ## Known Bugs
 
@@ -96,4 +105,5 @@ you will start a live development environment for the application from there. Mo
 
 5. Automatically set min and max values for the region size, x, and y offsets based off the dsiplay being used and system variables. 
 
+6. Prevent action replay from occuring when recording is in progress and prevent recording from happening when action replay is in progress. 
 
