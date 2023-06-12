@@ -1,6 +1,6 @@
 # Sabil Shot
 ## A screen Recording and Action Replay desktop solution written in Rust and utilizing Tauri. 
-
+ 	![Header Pictures](https://github.com/FizleWit/Sabil_Shot/blob/main/readmeFiles/ssMainPage.png?raw=true "Title")
 
 This project was created for my Capstone. It is a desktop application to that is designed to assist you in taking screenshots, recording desktop video, desktop audio, and microphone audio. There is also a feature for action replay. 
 
